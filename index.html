@@ -1,4 +1,8 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KIKE's 50s - Super Plataformas Retro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -8,17 +12,19 @@
         * {
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
             touch-action: manipulation;
+            box-sizing: border-box;
         }
-        body {
-            font-family: 'Press Start 2P', monospace;
-            background-color: #0b0813;
-            color: #fff;
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
-        }
-        .pixel-border {
-            border: 4px solid #00ffcc;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5), inset 0 0 15px rgba(0, 255, 204, 0.3);
+            background-color: #05030a;
+            font-family: 'Press Start 2P', monospace;
+            color: #fff;
         }
         .retro-box {
             background-color: #161224;
@@ -31,69 +37,91 @@
         .neon-text {
             animation: neonGlow 1.5s infinite alternate;
         }
+
+        /* Botones táctiles optimizados para pulgares en móvil vertical */
         .btn-touch {
             background: linear-gradient(180deg, #ff007f 0%, #a60053 100%);
-            border: 3px solid #fff;
-            box-shadow: 0 4px 0 #500028, 0 0 10px rgba(255, 0, 127, 0.6);
+            border: 4px solid #fff;
+            box-shadow: 0 6px 0 #500028, 0 0 15px rgba(255, 0, 127, 0.6);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            user-select: none;
+            touch-action: none;
         }
         .btn-touch:active {
             transform: translateY(4px);
-            box-shadow: 0 1px 0 #500028;
+            box-shadow: 0 2px 0 #500028;
+            background: linear-gradient(180deg, #d9006c 0%, #7d003f 100%);
         }
+
         .btn-dir {
             background: linear-gradient(180deg, #00d2ff 0%, #0077b6 100%);
-            border: 3px solid #fff;
-            box-shadow: 0 4px 0 #004066, 0 0 10px rgba(0, 210, 255, 0.6);
+            border: 4px solid #fff;
+            box-shadow: 0 6px 0 #004066, 0 0 15px rgba(0, 210, 255, 0.6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            user-select: none;
+            touch-action: none;
         }
         .btn-dir:active {
             transform: translateY(4px);
-            box-shadow: 0 1px 0 #004066;
+            box-shadow: 0 2px 0 #004066;
+            background: linear-gradient(180deg, #0099cc 0%, #005580 100%);
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-between h-dvh w-screen p-2 select-none overflow-hidden box-border">
+<body class="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 select-none">
 
-    <!-- CABECERA CON PUNTUACIÓN Y TIEMPO -->
-    <div class="w-full max-w-4xl flex justify-between items-center bg-slate-900/90 border-2 border-fuchsia-500 rounded-lg p-2 text-[9px] sm:text-xs text-amber-300 shadow-lg z-10 shrink-0">
-        <div>KIKE'S 50s</div>
-        <div id="scoreDisplay">PUNTOS: 00000</div>
+    <!-- CABECERA DE PUNTUACIÓN (COMPACTA Y SIEMPRE VISIBLE) -->
+    <header class="w-full bg-slate-900 border-b-2 border-fuchsia-500 p-2 flex justify-between items-center text-[10px] sm:text-xs text-amber-300 z-20 shrink-0">
+        <div class="font-bold text-pink-500">KIKE's 50s</div>
+        <div id="scoreDisplay">PTS: 00000</div>
         <div id="beerDisplay">🍺: 0/1</div>
-        <button id="audioToggleBtn" class="bg-slate-800 text-cyan-400 border border-cyan-400 px-2 py-1 rounded text-[8px] sm:text-[9px] hover:bg-slate-700">🔊 SONIDO</button>
-    </div>
+        <button id="audioToggleBtn" class="bg-slate-800 text-cyan-400 border border-cyan-400 px-2 py-1 rounded text-[9px] hover:bg-slate-700 active:scale-95">🔊 SONIDO</button>
+    </header>
 
-    <!-- PANTALLA PRINCIPAL DEL JUEGO / CANVAS -->
-    <div class="relative flex-1 w-full max-w-4xl flex items-center justify-center my-1 overflow-hidden min-h-0">
-        <canvas id="gameCanvas" class="bg-black rounded-lg shadow-2xl border-2 border-cyan-500 w-full h-full object-contain"></canvas>
+    <!-- ÁREA PRINCIPAL DE JUEGO (OCUPA TODO EL ESPACIO VERTICAL DISPONIBLE) -->
+    <main class="relative flex-1 w-full h-full min-h-0 bg-black overflow-hidden flex items-center justify-center">
+        <!-- Canvas responsivo ocupando la totalidad del contenedor -->
+        <canvas id="gameCanvas" class="w-full h-full block object-cover"></canvas>
 
-        <!-- MENSAJE MUTE/ALERTA DE CERVEZA NECESARIA -->
-        <div id="beerWarningMsg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-md text-[10px] sm:text-xs border-2 border-white shadow-xl z-20 text-center animate-bounce w-11/12 max-w-xs">
+        <!-- ALERTA CERVEZA NECESARIA -->
+        <div id="beerWarningMsg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-3 rounded-xl text-xs border-2 border-white shadow-2xl z-30 text-center animate-bounce w-11/12 max-w-xs">
             🍺 ¡Necesitas al menos 1 cerveza para entrar a la discoteca!
         </div>
 
         <!-- PANTALLA INICIAL DE PRESENTACIÓN -->
-        <div id="startOverlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20 rounded-lg border-2 border-pink-500">
-            <h1 class="text-lg sm:text-3xl text-pink-500 mb-3 neon-text">KIKE's 50s</h1>
-            <p class="text-[9px] sm:text-xs text-cyan-300 mb-6 max-w-md leading-relaxed">
-                Supera el nivel en Madrid, destruye bloques, tómate la Cerveza Especial para volverte gigante y entra a la Discoteca.
+        <div id="startOverlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40">
+            <h1 class="text-2xl sm:text-4xl text-pink-500 mb-4 neon-text font-bold">KIKE's 50s</h1>
+            <p class="text-[10px] sm:text-xs text-cyan-300 mb-8 max-w-xs leading-relaxed">
+                ¡Supera el nivel en Madrid! Rompe bloques, tómate la Cerveza Especial para hacerte gigante y entra en la Discoteca.
             </p>
 
-            <button id="startBtn" class="bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-bold px-6 py-3 sm:py-4 rounded-md text-xs sm:text-sm shadow-lg transform transition active:scale-95 border-2 border-white">
+            <button id="startBtn" class="bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black px-8 py-5 rounded-2xl text-sm shadow-2xl transform transition active:scale-95 border-4 border-white tracking-wider">
                 ¡EMPEZAR JUEGO!
             </button>
         </div>
 
         <!-- OVERLAY DE RECOMPENSA / VICTORIA -->
-        <div id="winOverlay" class="hidden absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-4 text-center z-30 rounded-lg">
-            <h2 class="text-xs sm:text-base text-yellow-400 mb-3 tracking-wider neon-text">
+        <div id="winOverlay" class="hidden absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-6 text-center z-40">
+            <h2 class="text-sm sm:text-lg text-yellow-400 mb-4 tracking-wider neon-text font-bold">
                 ¡NIVEL 1 SUPERADO!
             </h2>
-            <p class="text-[9px] sm:text-xs text-slate-200 mb-4 max-w-xs sm:max-w-md leading-relaxed">
-                Has reunido todas las jarras de cerveza para la fiesta.
+            <p class="text-[10px] sm:text-xs text-slate-200 mb-4 max-w-xs leading-relaxed">
+                Has reunido todas las jarras de cerveza para la gran fiesta.
             </p>
 
-            <!-- CAJA ESTILO MENSAJE DE RECOMPENSA -->
-            <div class="retro-box p-3 sm:p-6 rounded-lg mb-4 max-w-sm w-full shadow-2xl">
-                <p class="text-[9px] sm:text-xs text-cyan-400 mb-2 font-bold tracking-widest">
+            <!-- CAJA MENSAJE RECOMPENSA -->
+            <div class="retro-box p-4 rounded-xl mb-6 max-w-xs w-full shadow-2xl">
+                <p class="text-[9px] text-cyan-400 mb-2 font-bold tracking-widest">
                     FECHA DESBLOQUEADA:
                 </p>
                 <p class="text-xs sm:text-sm text-cyan-300 font-extrabold tracking-wider border-y-2 border-cyan-400/40 py-2">
@@ -101,42 +129,45 @@
                 </p>
             </div>
 
-            <p class="text-[8px] sm:text-[11px] text-emerald-400 animate-pulse max-w-xs leading-relaxed mb-4">
+            <p class="text-[9px] text-emerald-400 animate-pulse max-w-xs leading-relaxed mb-6">
                 Próximamente recibirás el siguiente juego para descubrir la hora
             </p>
 
-            <button id="restartBtn" class="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded text-[10px] sm:text-xs border border-white shadow-md">
+            <button id="restartBtn" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-xl text-xs border-2 border-white shadow-lg active:scale-95">
                 JUGAR DE NUEVO
             </button>
         </div>
-    </div>
+    </main>
 
-    <!-- CONTROLES TÁCTILES PARA MÓVIL (AJUSTADOS Y SIEMPRE VISIBLES EN PANTALLAS PEQUEÑAS) -->
-    <div class="w-full max-w-4xl flex justify-between items-center px-3 py-2 z-10 select-none shrink-0 touch-none">
-        <!-- D-PAD IZQUIERDA / DERECHA -->
-        <div class="flex gap-3">
-            <button id="btnLeft" class="btn-dir w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold active:bg-cyan-600 touch-none">
-                ◄
-            </button>
-            <button id="btnRight" class="btn-dir w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold active:bg-cyan-600 touch-none">
-                ►
-            </button>
+    <!-- CONTROLES TÁCTILES EXTRA GRANDES Y SEPARADOS PARA MÓVIL EN VERTICAL -->
+    <footer class="w-full bg-slate-900/90 border-t-2 border-cyan-500/50 p-4 shrink-0 z-20 touch-none">
+        <div class="max-w-md mx-auto flex justify-between items-center gap-4">
+            <!-- BOTONES DIRECCIONALES (IZQUIERDA / DERECHA) -->
+            <div class="flex gap-4">
+                <button id="btnLeft" class="btn-dir w-20 h-20 text-3xl active:bg-cyan-600">
+                    ◄
+                </button>
+                <button id="btnRight" class="btn-dir w-20 h-20 text-3xl active:bg-cyan-600">
+                    ►
+                </button>
+            </div>
+
+            <!-- BOTÓN DE SALTO (GIGANTE PARA PULGAR DERECHO) -->
+            <div>
+                <button id="btnJump" class="btn-touch w-24 h-20 text-xs tracking-wider uppercase active:bg-pink-700">
+                    SALTO
+                </button>
+            </div>
         </div>
+    </footer>
 
-        <!-- BOTÓN DE SALTO -->
-        <div>
-            <button id="btnJump" class="btn-touch w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold active:bg-pink-700 touch-none">
-                SALTO
-            </button>
-        </div>
-    </div>
-
-    <!-- LÓGICA COMPLETA DEL JUEGO JS CON SINTETIZADOR 8-BIT -->
+    <!-- LÓGICA COMPLETA DEL JUEGO CON MELODÍA ESTILO SUPER MARIO BROS -->
     <script>
-        // --- CONFIGURACIÓN DE AUDIO 8-BIT SINTETIZADO ---
+        // --- SINTETIZADOR AUDIO 8-BIT ESTILO SUPER MARIO BROS ---
         let audioCtx = null;
         let isMuted = false;
-        let bgmInterval = null;
+        let bgmTimeout = null;
+        let isBgmPlaying = false;
 
         function initAudio() {
             if (!audioCtx) {
@@ -147,8 +178,7 @@
             }
         }
 
-        // Tono retro simple
-        function playTone(freq, type, duration, delay = 0) {
+        function playTone(freq, type, duration, volume = 0.1, delay = 0) {
             if (isMuted || !audioCtx) return;
             setTimeout(() => {
                 try {
@@ -156,8 +186,8 @@
                     const gain = audioCtx.createGain();
                     osc.type = type;
                     osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start();
@@ -166,186 +196,185 @@
             }, delay * 1000);
         }
 
-        // Sonido de Salto
+        // Sonido de Salto Retro Classic
         function playJumpSound() {
             if (isMuted || !audioCtx) return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
+                osc.stop(audioCtx.currentTime + 0.12);
             } catch(e){}
         }
 
-        // Sonido de Monedas / Cerveza
+        // Sonido Moneda / Cerveza estilo Mario
         function playPowerupSound() {
             if (isMuted || !audioCtx) return;
-            playTone(330, 'square', 0.08, 0);
-            playTone(440, 'square', 0.08, 0.08);
-            playTone(554, 'square', 0.08, 0.16);
-            playTone(659, 'square', 0.2, 0.24);
+            playTone(987.77, 'square', 0.08, 0.12, 0);   // B5
+            playTone(1318.51, 'square', 0.25, 0.12, 0.08); // E6
         }
 
         // Sonido Romper Bloque
         function playBreakSound() {
             if (isMuted || !audioCtx) return;
-            playTone(120, 'sawtooth', 0.1, 0);
-            playTone(80, 'sawtooth', 0.1, 0.05);
+            playTone(160, 'sawtooth', 0.08, 0.15, 0);
+            playTone(100, 'sawtooth', 0.08, 0.15, 0.04);
         }
 
-        // Fanfarria de Victoria
+        // Fanfarria Victoria Estilo Mario Stage Clear
         function playWinSound() {
             if (isMuted || !audioCtx) return;
             stopBGM();
-            const notes = [261.6, 329.6, 392, 523.25, 440, 523.25, 659.25];
-            const times = [0, 0.12, 0.24, 0.36, 0.55, 0.68, 0.85];
+            const notes = [
+                { f: 261.63, d: 0.1 }, { f: 329.63, d: 0.1 }, { f: 392.00, d: 0.1 },
+                { f: 523.25, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 783.99, d: 0.3 }
+            ];
             notes.forEach((n, i) => {
-                playTone(n, 'triangle', 0.25, times[i]);
+                playTone(n.f, 'square', n.d, 0.15, i * 0.12);
             });
         }
 
-        // BGM de Fondo - Melodía 8-Bit Animada y Rápida
+        // --- MÚSICA DE FONDO (TEMA PRINCIPAL ESTILO SUPER MARIO BROS) ---
+        const marioThemeMelody = [
+            // Frase 1 (Intro clásica de Mario)
+            { f: 659.25, d: 0.12, t: 0 },
+            { f: 659.25, d: 0.12, t: 0.15 },
+            { f: 0,      d: 0.12, t: 0.30 },
+            { f: 659.25, d: 0.12, t: 0.45 },
+            { f: 0,      d: 0.12, t: 0.60 },
+            { f: 523.25, d: 0.12, t: 0.75 },
+            { f: 659.25, d: 0.12, t: 0.90 },
+            { f: 0,      d: 0.12, t: 1.05 },
+            { f: 783.99, d: 0.20, t: 1.20 },
+            { f: 0,      d: 0.20, t: 1.45 },
+            { f: 392.00, d: 0.20, t: 1.70 },
+            { f: 0,      d: 0.20, t: 1.95 },
+
+            // Frase 2
+            { f: 523.25, d: 0.16, t: 2.20 },
+            { f: 0,      d: 0.10, t: 2.40 },
+            { f: 392.00, d: 0.16, t: 2.55 },
+            { f: 0,      d: 0.10, t: 2.75 },
+            { f: 329.63, d: 0.16, t: 2.90 },
+            { f: 0,      d: 0.10, t: 3.10 },
+            { f: 440.00, d: 0.14, t: 3.25 },
+            { f: 493.88, d: 0.14, t: 3.45 },
+            { f: 466.16, d: 0.14, t: 3.65 },
+            { f: 440.00, d: 0.16, t: 3.85 },
+            { f: 392.00, d: 0.14, t: 4.05 },
+            { f: 659.25, d: 0.14, t: 4.25 },
+            { f: 783.99, d: 0.14, t: 4.45 },
+            { f: 880.00, d: 0.16, t: 4.65 },
+            { f: 698.46, d: 0.14, t: 4.85 },
+            { f: 783.99, d: 0.14, t: 5.05 },
+            { f: 659.25, d: 0.16, t: 5.25 },
+            { f: 523.25, d: 0.14, t: 5.45 },
+            { f: 587.33, d: 0.14, t: 5.65 },
+            { f: 493.88, d: 0.20, t: 5.85 }
+        ];
+
+        function playBGMSequence() {
+            if (isMuted || !isBgmPlaying || !audioCtx) return;
+
+            const totalDuration = 6.2; // Duración en segundos del bucle
+
+            marioThemeMelody.forEach(note => {
+                if (note.f > 0) {
+                    playTone(note.f, 'square', note.d, 0.08, note.t);
+                    // Acompañamiento de bajo
+                    playTone(note.f / 2, 'triangle', note.d * 0.9, 0.06, note.t);
+                }
+            });
+
+            bgmTimeout = setTimeout(() => {
+                if (isBgmPlaying) playBGMSequence();
+            }, totalDuration * 1000);
+        }
+
         function startBGM() {
             stopBGM();
             if (isMuted) return;
-            // Melodía tipo chiptune alegre y enérgica en ritmo rápido
-            const melody = [
-                {f: 392, d: 0.12}, {f: 392, d: 0.12}, {f: 0, d: 0.06}, {f: 392, d: 0.12},
-                {f: 313.6, d: 0.12}, {f: 392, d: 0.12}, {f: 0, d: 0.06}, {f: 493.88, d: 0.15},
-                {f: 523.25, d: 0.15}, {f: 392, d: 0.15}, {f: 329.63, d: 0.15}, {f: 261.63, d: 0.15},
-                {f: 293.66, d: 0.12}, {f: 329.63, d: 0.12}, {f: 349.23, d: 0.12}, {f: 392, d: 0.18},
-                {f: 440, d: 0.12}, {f: 493.88, d: 0.12}, {f: 523.25, d: 0.2}, {f: 0, d: 0.1}
-            ];
-            let noteIdx = 0;
-            bgmInterval = setInterval(() => {
-                if (isMuted || !audioCtx) return;
-                const note = melody[noteIdx];
-                if (note.f > 0) {
-                    playTone(note.f, 'square', note.d, 0);
-                    // Bajo ritmico continuo en tono grave
-                    playTone(note.f / 2, 'triangle', note.d * 0.8, 0);
-                }
-                noteIdx = (noteIdx + 1) % melody.length;
-            }, 140);
+            isBgmPlaying = true;
+            playBGMSequence();
         }
 
         function stopBGM() {
-            if (bgmInterval) {
-                clearInterval(bgmInterval);
-                bgmInterval = null;
+            isBgmPlaying = false;
+            if (bgmTimeout) {
+                clearTimeout(bgmTimeout);
+                bgmTimeout = null;
             }
         }
 
-        // --- IMÁGENES / SPRITES EN ALTA DEFINICIÓN (SVG VIBRANTES Y FIELES) ---
-        
-        // Kike Normal: Pelo castaño en punta, ojos expresivos, camiseta negra, peto azul con botones dorados
+        // --- SPRITES EN SVG ---
         const kikeNormalSVG = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-            <!-- Sombra suave -->
             <ellipse cx="32" cy="62" rx="20" ry="2" fill="rgba(0,0,0,0.3)" />
-            <!-- Zapatos -->
             <rect x="18" y="54" width="12" height="7" rx="3" fill="#1e293b"/>
             <rect x="34" y="54" width="12" height="7" rx="3" fill="#1e293b"/>
-            <rect x="20" y="58" width="8" height="3" rx="1" fill="#475569"/>
-            <rect x="36" y="58" width="8" height="3" rx="1" fill="#475569"/>
-            <!-- Piernas del Peto Vaquero -->
             <rect x="20" y="42" width="9" height="14" fill="#2563eb"/>
             <rect x="35" y="42" width="9" height="14" fill="#2563eb"/>
-            <rect x="20" y="50" width="9" height="4" fill="#1d4ed8"/>
-            <rect x="35" y="50" width="9" height="4" fill="#1d4ed8"/>
-            <!-- Torso / Camiseta negra y Peto -->
             <rect x="20" y="30" width="24" height="14" rx="2" fill="#0f172a"/>
             <rect x="22" y="32" width="20" height="12" rx="1" fill="#2563eb"/>
-            <!-- Tirantes del Peto -->
             <rect x="23" y="28" width="4" height="10" fill="#1d4ed8"/>
             <rect x="37" y="28" width="4" height="10" fill="#1d4ed8"/>
-            <!-- Botones Dorados -->
             <circle cx="25" cy="36" r="2" fill="#fbbf24"/>
             <circle cx="39" cy="36" r="2" fill="#fbbf24"/>
-            <!-- Brazos y Puños -->
             <rect x="13" y="31" width="8" height="10" rx="3" fill="#0f172a"/>
             <rect x="43" y="31" width="8" height="10" rx="3" fill="#0f172a"/>
             <circle cx="15" cy="42" r="4" fill="#fca5a5"/>
             <circle cx="49" cy="42" r="4" fill="#fca5a5"/>
-            <!-- Cabeza y Cuello -->
             <rect x="28" y="25" width="8" height="5" fill="#fca5a5"/>
             <rect x="20" y="10" width="24" height="18" rx="6" fill="#fca5a5"/>
-            <!-- Orejas -->
             <circle cx="19" cy="19" r="3" fill="#f87171"/>
             <circle cx="45" cy="19" r="3" fill="#f87171"/>
-            <!-- Ojos brillante retro -->
             <rect x="25" y="15" width="4" height="5" rx="1" fill="#0f172a"/>
             <rect x="35" y="15" width="4" height="5" rx="1" fill="#0f172a"/>
             <rect x="26" y="16" width="2" height="2" fill="#ffffff"/>
             <rect x="36" y="16" width="2" height="2" fill="#ffffff"/>
-            <!-- Cejas -->
             <rect x="24" y="12" width="6" height="2" fill="#451a03"/>
             <rect x="34" y="12" width="6" height="2" fill="#451a03"/>
-            <!-- Gran Sonrisa -->
             <path d="M 26 22 Q 32 27 38 22" stroke="#991b1b" stroke-width="2" fill="none" stroke-linecap="round"/>
             <path d="M 27 22 Q 32 26 37 22" fill="#ffffff"/>
-            <!-- Pelo Castaño Despeinado 90s -->
             <path d="M 18 13 C 18 4, 25 2, 32 2 C 39 2, 46 4, 46 13 C 44 9, 41 8, 38 10 C 35 7, 30 7, 27 9 C 24 7, 20 9, 18 13 Z" fill="#78350f"/>
-            <path d="M 21 8 L 24 3 L 28 8 L 33 2 L 38 7 L 42 4 L 44 10 Z" fill="#9a3412"/>
         </svg>`;
 
-        // Kike Gigante con Cerveza: Mismo estilo pero más imponente, sosteniendo una jarra de cerveza helada y espumosa
         const kikeBeerSVG = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-            <!-- Sombra -->
             <ellipse cx="32" cy="62" rx="22" ry="2" fill="rgba(0,0,0,0.4)" />
-            <!-- Zapatos -->
             <rect x="14" y="53" width="13" height="8" rx="3" fill="#0f172a"/>
             <rect x="37" y="53" width="13" height="8" rx="3" fill="#0f172a"/>
-            <!-- Piernas Fuerte Peto -->
             <rect x="16" y="40" width="11" height="15" fill="#1d4ed8"/>
             <rect x="37" y="40" width="11" height="15" fill="#1d4ed8"/>
-            <!-- Torso / Peto -->
             <rect x="16" y="27" width="32" height="16" rx="3" fill="#0f172a"/>
             <rect x="18" y="29" width="28" height="14" rx="2" fill="#2563eb"/>
-            <!-- Tirantes y Botones -->
             <rect x="20" y="25" width="5" height="11" fill="#1e40af"/>
             <rect x="39" y="25" width="5" height="11" fill="#1e40af"/>
             <circle cx="22.5" cy="34" r="2.5" fill="#fbbf24"/>
             <circle cx="41.5" cy="34" r="2.5" fill="#fbbf24"/>
-            <!-- Brazo Izquierdo -->
             <rect x="8" y="28" width="9" height="12" rx="3" fill="#0f172a"/>
             <circle cx="11" cy="40" r="4.5" fill="#fca5a5"/>
-            <!-- Cabeza -->
             <rect x="28" y="22" width="8" height="6" fill="#fca5a5"/>
             <rect x="18" y="7" width="28" height="19" rx="6" fill="#fca5a5"/>
             <circle cx="17" cy="16" r="3.5" fill="#f87171"/>
             <circle cx="47" cy="16" r="3.5" fill="#f87171"/>
-            <!-- Ojos Expresivos -->
             <rect x="24" y="12" width="5" height="6" rx="1" fill="#0f172a"/>
             <rect x="35" y="12" width="5" height="6" rx="1" fill="#0f172a"/>
-            <rect x="25" y="13" width="2" height="2" fill="#ffffff"/>
-            <rect x="36" y="13" width="2" height="2" fill="#ffffff"/>
-            <!-- Sonrisa de Fiesta -->
             <path d="M 24 20 Q 32 26 40 20" stroke="#7f1d1d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
             <path d="M 25 20 Q 32 25 39 20" fill="#ffffff"/>
-            <!-- Pelo Castaño estilo Kike -->
-            <path d="M 16 11 C 16 2, 24 0, 32 0 C 40 0, 48 2, 48 11 C 45 7, 42 6, 38 8 C 34 5, 29 5, 26 7 C 23 5, 18 7, 16 11 Z" fill="#78350f"/>
-            <path d="M 19 6 L 23 1 L 28 6 L 33 0 L 39 5 L 44 2 L 46 8 Z" fill="#9a3412"/>
-            <!-- JARRA DE CERVEZA GRANDE EN LA MANO DERECHA -->
+            <path d="M 16 11 C 16 2, 24 0, 32 0 C 40 0, 48 2, 48 11 C 45 7, 42 6, 38 8 Z" fill="#78350f"/>
             <g transform="translate(42, 22)">
-                <!-- Jarra de Cristal -->
                 <rect x="4" y="8" width="15" height="20" rx="3" fill="#fef08a" stroke="#ffffff" stroke-width="1.5"/>
                 <rect x="6" y="12" width="11" height="14" fill="#f59e0b"/>
                 <rect x="1" y="12" width="4" height="12" rx="2" fill="none" stroke="#ffffff" stroke-width="2"/>
-                <!-- Espuma rebosante -->
                 <path d="M 2 8 C 2 4, 6 4, 8 6 C 10 3, 14 3, 16 6 C 18 4, 21 5, 20 9 Z" fill="#ffffff"/>
-                <!-- Burbujitas -->
-                <circle cx="8" cy="16" r="1" fill="#fef3c7"/>
-                <circle cx="12" cy="21" r="1.5" fill="#fef3c7"/>
-                <circle cx="14" cy="15" r="1" fill="#fef3c7"/>
             </g>
         </svg>`;
 
@@ -355,7 +384,7 @@
         const imgKikeBeer = new Image();
         imgKikeBeer.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(kikeBeerSVG);
 
-        // --- ESTADO Y VARIABLES DEL JUEGO ---
+        // --- ESTADO DEL JUEGO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -364,16 +393,16 @@
         let beersCollected = 0;
         let cameraX = 0;
 
-        // Propiedades del jugador
+        // Jugador
         const player = {
-            x: 50,
+            x: 40,
             y: 200,
             width: 32,
-            height: 38,
+            height: 42,
             vx: 0,
             vy: 0,
-            speed: 3.8,
-            jumpPower: -10.5,
+            speed: 4.2,
+            jumpPower: -11.5,
             isGrounded: false,
             isBig: false,
             facingRight: true
@@ -381,77 +410,76 @@
 
         const keys = { left: false, right: false, up: false };
 
-        // Mapa del nivel
         const levelWidth = 2400;
-        const groundY = 320;
+        let groundY = 380; // Se calcula dinámicamente
 
         let blocks = [];
         let coins = [];
         let beers = [];
-        let discoDoor = { x: 2150, y: groundY - 100, width: 90, height: 100 };
+        let discoDoor = { x: 2150, y: 0, width: 90, height: 110 };
 
         function initLevel() {
             score = 0;
             beersCollected = 0;
             updateHUD();
 
-            player.x = 50;
-            player.y = groundY - 50;
+            groundY = canvas.height - 40;
+            discoDoor.y = groundY - 110;
+
+            player.x = 40;
+            player.y = groundY - 60;
             player.vx = 0;
             player.vy = 0;
             player.isBig = false;
             player.width = 32;
-            player.height = 38;
+            player.height = 42;
+
+            const bY = groundY - 110;
 
             blocks = [
-                // Grupo 1 de Bloques y Plataformas Elevadas
-                { x: 220, y: 220, width: 32, height: 32, type: 'brick' },
-                { x: 252, y: 220, width: 32, height: 32, type: 'beer_question', hit: false },
-                { x: 284, y: 220, width: 32, height: 32, type: 'brick' },
+                { x: 220, y: bY, width: 32, height: 32, type: 'brick' },
+                { x: 252, y: bY, width: 32, height: 32, type: 'beer_question', hit: false },
+                { x: 284, y: bY, width: 32, height: 32, type: 'brick' },
                 
-                // Escalones de acceso
-                { x: 400, y: 288, width: 32, height: 32, type: 'solid' },
-                { x: 432, y: 256, width: 32, height: 32, type: 'solid' },
-                { x: 464, y: 220, width: 32, height: 32, type: 'brick' },
-                { x: 496, y: 220, width: 32, height: 32, type: 'question', hit: false },
-                { x: 528, y: 220, width: 32, height: 32, type: 'brick' },
+                { x: 400, y: groundY - 32, width: 32, height: 32, type: 'solid' },
+                { x: 432, y: groundY - 64, width: 32, height: 32, type: 'solid' },
+                { x: 464, y: bY, width: 32, height: 32, type: 'brick' },
+                { x: 496, y: bY, width: 32, height: 32, type: 'question', hit: false },
+                { x: 528, y: bY, width: 32, height: 32, type: 'brick' },
 
-                // Plataforma alta
-                { x: 700, y: 180, width: 32, height: 32, type: 'solid' },
-                { x: 732, y: 180, width: 32, height: 32, type: 'brick' },
-                { x: 764, y: 180, width: 32, height: 32, type: 'brick' },
-                { x: 796, y: 180, width: 32, height: 32, type: 'solid' },
+                { x: 700, y: bY - 40, width: 32, height: 32, type: 'solid' },
+                { x: 732, y: bY - 40, width: 32, height: 32, type: 'brick' },
+                { x: 764, y: bY - 40, width: 32, height: 32, type: 'brick' },
+                { x: 796, y: bY - 40, width: 32, height: 32, type: 'solid' },
 
-                // Zona intermedia con cerveza adicional
-                { x: 1050, y: 220, width: 32, height: 32, type: 'brick' },
-                { x: 1082, y: 220, width: 32, height: 32, type: 'beer_question', hit: false },
-                { x: 1114, y: 220, width: 32, height: 32, type: 'brick' },
+                { x: 1050, y: bY, width: 32, height: 32, type: 'brick' },
+                { x: 1082, y: bY, width: 32, height: 32, type: 'beer_question', hit: false },
+                { x: 1114, y: bY, width: 32, height: 32, type: 'brick' },
 
-                // Pirámide final
-                { x: 1500, y: 288, width: 32, height: 32, type: 'solid' },
-                { x: 1532, y: 256, width: 32, height: 32, type: 'solid' },
-                { x: 1564, y: 224, width: 32, height: 32, type: 'solid' },
-                { x: 1700, y: 224, width: 32, height: 32, type: 'solid' },
-                { x: 1732, y: 256, width: 32, height: 32, type: 'solid' },
-                { x: 1764, y: 288, width: 32, height: 32, type: 'solid' },
+                { x: 1500, y: groundY - 32, width: 32, height: 32, type: 'solid' },
+                { x: 1532, y: groundY - 64, width: 32, height: 32, type: 'solid' },
+                { x: 1564, y: groundY - 96, width: 32, height: 32, type: 'solid' },
+                { x: 1700, y: groundY - 96, width: 32, height: 32, type: 'solid' },
+                { x: 1732, y: groundY - 64, width: 32, height: 32, type: 'solid' },
+                { x: 1764, y: groundY - 32, width: 32, height: 32, type: 'solid' },
             ];
 
             coins = [
-                { x: 228, y: 180, collected: false },
-                { x: 292, y: 180, collected: false },
-                { x: 472, y: 180, collected: false },
-                { x: 536, y: 180, collected: false },
-                { x: 740, y: 140, collected: false },
-                { x: 772, y: 140, collected: false },
-                { x: 1572, y: 180, collected: false },
-                { x: 1708, y: 180, collected: false }
+                { x: 228, y: bY - 40, collected: false },
+                { x: 292, y: bY - 40, collected: false },
+                { x: 472, y: bY - 40, collected: false },
+                { x: 536, y: bY - 40, collected: false },
+                { x: 740, y: bY - 80, collected: false },
+                { x: 772, y: bY - 80, collected: false },
+                { x: 1572, y: groundY - 140, collected: false },
+                { x: 1708, y: groundY - 140, collected: false }
             ];
 
             beers = [];
         }
 
         function updateHUD() {
-            document.getElementById('scoreDisplay').innerText = `PUNTOS: ${String(score).padStart(5, '0')}`;
+            document.getElementById('scoreDisplay').innerText = `PTS: ${String(score).padStart(5, '0')}`;
             document.getElementById('beerDisplay').innerText = `🍺: ${beersCollected}/1`;
         }
 
@@ -460,14 +488,13 @@
             warning.classList.remove('hidden');
             setTimeout(() => {
                 warning.classList.add('hidden');
-            }, 3000);
+            }, 2500);
         }
 
-        // --- BUCLE DE ACTUALIZACIÓN Y FÍSICAS ---
+        // --- FÍSICAS Y LÓGICA ---
         function update() {
             if (!isGameRunning) return;
 
-            // Movimiento horizontal
             if (keys.left) {
                 player.vx = -player.speed;
                 player.facingRight = false;
@@ -475,20 +502,17 @@
                 player.vx = player.speed;
                 player.facingRight = true;
             } else {
-                player.vx *= 0.7;
+                player.vx *= 0.65;
             }
 
-            // Salto
             if (keys.up && player.isGrounded) {
                 player.vy = player.jumpPower;
                 player.isGrounded = false;
                 playJumpSound();
             }
 
-            // Gravedad
-            player.vy += 0.55;
+            player.vy += 0.6; // Gravedad
 
-            // Aplicar movimientos con detección de colisiones
             player.x += player.vx;
             checkCollisionX();
 
@@ -496,18 +520,16 @@
             player.isGrounded = false;
             checkCollisionY();
 
-            // Límites del suelo principal
             if (player.y + player.height >= groundY) {
                 player.y = groundY - player.height;
                 player.vy = 0;
                 player.isGrounded = true;
             }
 
-            // Límites de la pantalla horizontal
             if (player.x < 0) player.x = 0;
             if (player.x + player.width > levelWidth) player.x = levelWidth - player.width;
 
-            // Colisión con Monedas
+            // Monedas
             coins.forEach(c => {
                 if (!c.collected && isColliding(player, { x: c.x, y: c.y, width: 16, height: 16 })) {
                     c.collected = true;
@@ -517,13 +539,12 @@
                 }
             });
 
-            // Actualización y colisión con Cervezas
+            // Cervezas
             beers.forEach(b => {
                 if (!b.collected) {
                     b.vy += 0.4;
                     b.y += b.vy;
 
-                    // Colisión cerveza con bloques o suelo
                     blocks.forEach(blk => {
                         if (isColliding(b, blk)) {
                             b.y = blk.y - b.height;
@@ -537,7 +558,6 @@
 
                     b.x += b.vx;
 
-                    // Colisión con el Jugador
                     if (isColliding(player, b)) {
                         b.collected = true;
                         beersCollected++;
@@ -549,7 +569,7 @@
                 }
             });
 
-            // Entrada a la Discoteca (Meta)
+            // Meta Discoteca
             if (isColliding(player, discoDoor)) {
                 if (beersCollected >= 1) {
                     winGame();
@@ -559,8 +579,8 @@
                 }
             }
 
-            // Scroll suave de cámara
-            cameraX = player.x - canvas.width / 3;
+            // Cámara adaptada para visualización vertical centrada
+            cameraX = player.x - canvas.width / 2 + player.width / 2;
             if (cameraX < 0) cameraX = 0;
             if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width;
         }
@@ -568,18 +588,15 @@
         function makePlayerBig() {
             player.isBig = true;
             player.width = 44;
-            player.height = 52;
+            player.height = 56;
             player.y -= 14;
         }
 
         function checkCollisionX() {
             blocks.forEach(b => {
                 if (isColliding(player, b)) {
-                    if (player.vx > 0) {
-                        player.x = b.x - player.width;
-                    } else if (player.vx < 0) {
-                        player.x = b.x + b.width;
-                    }
+                    if (player.vx > 0) player.x = b.x - player.width;
+                    else if (player.vx < 0) player.x = b.x + b.width;
                 }
             });
         }
@@ -587,11 +604,11 @@
         function checkCollisionY() {
             blocks.forEach((b, index) => {
                 if (isColliding(player, b)) {
-                    if (player.vy > 0) { // Cayendo sobre bloque
+                    if (player.vy > 0) {
                         player.y = b.y - player.height;
                         player.vy = 0;
                         player.isGrounded = true;
-                    } else if (player.vy < 0) { // Golpeando bloque por abajo
+                    } else if (player.vy < 0) {
                         player.y = b.y + b.height;
                         player.vy = 0;
 
@@ -601,8 +618,6 @@
                                 score += 50;
                                 updateHUD();
                                 playBreakSound();
-                            } else {
-                                playTone(150, 'square', 0.05);
                             }
                         } else if (b.type === 'beer_question' && !b.hit) {
                             b.hit = true;
@@ -626,23 +641,23 @@
                    a.y + a.height > b.y;
         }
 
-        // --- RENDERIZADO DEL JUEGO ---
+        // --- RENDERIZADO ---
         function render() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             ctx.save();
             ctx.translate(-Math.floor(cameraX), 0);
 
-            // 1. Fondo Cyberpunk Madrid de Noche
+            // 1. Fondo Madrid Cyberpunk
             drawMadridBackground();
 
-            // 2. Suelo Retro Cyberpunk
+            // 2. Suelo Retro
             ctx.fillStyle = '#1e1b4b';
             ctx.fillRect(0, groundY, levelWidth, canvas.height - groundY);
             ctx.fillStyle = '#06b6d4';
             ctx.fillRect(0, groundY, levelWidth, 4);
 
-            // Rejilla Neón del Suelo
+            // Rejilla Suelo
             ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
             ctx.lineWidth = 1;
             for (let x = 0; x < levelWidth; x += 32) {
@@ -652,7 +667,7 @@
                 ctx.stroke();
             }
 
-            // 3. Dibujar Bloques
+            // 3. Bloques
             blocks.forEach(b => {
                 if (b.type === 'solid') {
                     ctx.fillStyle = '#334155';
@@ -664,12 +679,6 @@
                     ctx.fillRect(b.x, b.y, b.width, b.height);
                     ctx.strokeStyle = '#78350f';
                     ctx.strokeRect(b.x, b.y, b.width, b.height);
-                    // Líneas estilo ladrillo
-                    ctx.beginPath();
-                    ctx.moveTo(b.x, b.y + 16); ctx.lineTo(b.x + 32, b.y + 16);
-                    ctx.moveTo(b.x + 16, b.y); ctx.lineTo(b.x + 16, b.y + 16);
-                    ctx.moveTo(b.x + 8, b.y + 16); ctx.lineTo(b.x + 8, b.y + 32);
-                    ctx.stroke();
                 } else if (b.type === 'beer_question' || b.type === 'question') {
                     ctx.fillStyle = b.hit ? '#475569' : '#eab308';
                     ctx.fillRect(b.x, b.y, b.width, b.height);
@@ -678,12 +687,12 @@
                     if (!b.hit) {
                         ctx.fillStyle = '#0f172a';
                         ctx.font = 'bold 16px "Press Start 2P"';
-                        ctx.fillText('?', b.x + 9, b.y + 23);
+                        ctx.fillText('?', b.x + 8, b.y + 23);
                     }
                 }
             });
 
-            // 4. Dibujar Monedas Coleccionables
+            // 4. Monedas
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.fillStyle = '#facc15';
@@ -695,23 +704,20 @@
                 }
             });
 
-            // 5. Dibujar Cervezas en Movimiento
+            // 5. Cervezas
             beers.forEach(b => {
                 if (!b.collected) {
-                    // Cerveza icono retro
                     ctx.fillStyle = '#f59e0b';
                     ctx.fillRect(b.x + 4, b.y + 6, 14, 16);
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(b.x + 2, b.y + 2, 18, 6);
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.strokeRect(b.x, b.y + 8, 4, 10);
                 }
             });
 
-            // 6. DISCOTECA DETALLADA Y LLAMATIVA ("?????")
+            // 6. Entrada Discoteca
             drawDiscotecaEntrance();
 
-            // 7. Dibujar al Personaje Kike
+            // 7. Jugador
             const spriteImg = player.isBig ? imgKikeBeer : imgKikeNormal;
             ctx.save();
             if (!player.facingRight) {
@@ -726,9 +732,7 @@
             ctx.restore();
         }
 
-        // Dibujo del Skyline Neón de Madrid
         function drawMadridBackground() {
-            // Cielo Nocturno Gradiente
             const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, '#020617');
             grad.addColorStop(0.6, '#1e1b4b');
@@ -739,129 +743,53 @@
             // Luna Neón
             ctx.fillStyle = '#ff007f';
             ctx.beginPath();
-            ctx.arc(cameraX + canvas.width - 80, 60, 30, 0, Math.PI * 2);
+            ctx.arc(cameraX + canvas.width - 60, 60, 25, 0, Math.PI * 2);
             ctx.fill();
 
-            // Título Flotante Neón en el cielo de Madrid
+            // Título Flotante Neón
             ctx.fillStyle = '#00f0ff';
-            ctx.shadowColor = '#00f0ff';
-            ctx.shadowBlur = 10;
-            ctx.font = '12px "Press Start 2P"';
-            ctx.fillText("KIKE's 50s - MADRID NOV26", cameraX + 30, 40);
-            ctx.shadowBlur = 0;
+            ctx.font = '10px "Press Start 2P"';
+            ctx.fillText("KIKE's 50s - MADRID", cameraX + 20, 35);
 
-            // Siluetas de Torres Kio (Puerta de Europa) inclinadas
+            // Torres Kio
             ctx.fillStyle = '#0f172a';
-
-            // Torre Kio Izquierda (inclinada hacia la derecha)
             ctx.save();
             ctx.translate(600, groundY);
             ctx.transform(1, 0, 0.25, 1, 0, 0);
             ctx.fillRect(0, -180, 50, 180);
             ctx.restore();
 
-            // Torre Kio Derecha (inclinada hacia la izquierda)
             ctx.save();
             ctx.translate(760, groundY);
             ctx.transform(1, 0, -0.25, 1, 0, 0);
             ctx.fillRect(0, -180, 50, 180);
             ctx.restore();
-
-            // Edificio España / Gran Vía Silueta
-            ctx.fillRect(1200, groundY - 140, 100, 140);
-            ctx.fillRect(1220, groundY - 190, 60, 50);
-
-            // Ventanas Neón encendidas en los edificios
-            ctx.fillStyle = '#f43f5e';
-            for (let i = 0; i < 5; i++) {
-                ctx.fillRect(1210 + (i * 16), groundY - 100, 8, 12);
-                ctx.fillRect(1210 + (i * 16), groundY - 60, 8, 12);
-            }
         }
 
-        // Dibujo de la Discoteca Estilo 90s Ultrallena de Detalles
         function drawDiscotecaEntrance() {
             const dx = discoDoor.x;
             const dy = discoDoor.y;
 
-            // 1. Fachada Principal de la Discoteca
             ctx.fillStyle = '#0f172a';
-            ctx.fillRect(dx - 20, dy - 40, 130, 140);
+            ctx.fillRect(dx - 20, dy - 40, 130, 150);
             ctx.strokeStyle = '#ec4899';
             ctx.lineWidth = 3;
-            ctx.strokeRect(dx - 20, dy - 40, 130, 140);
+            ctx.strokeRect(dx - 20, dy - 40, 130, 150);
 
-            // 2. Puerta de Cristal de la Discoteca
             ctx.fillStyle = '#0284c7';
-            ctx.fillRect(dx, dy + 20, 90, 80);
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(dx, dy + 20, 90, 80);
-            ctx.beginPath();
-            ctx.moveTo(dx + 45, dy + 20);
-            ctx.lineTo(dx + 45, dy + 100);
-            ctx.stroke();
+            ctx.fillRect(dx, dy + 20, 90, 90);
 
-            // Pomos dorados de la puerta
-            ctx.fillStyle = '#fbbf24';
-            ctx.circle = ctx.beginPath();
-            ctx.arc(dx + 38, dy + 60, 3, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath();
-            ctx.arc(dx + 52, dy + 60, 3, 0, Math.PI * 2); ctx.fill();
-
-            // 3. Letrero Neón Iluminado "????? DISCO"
+            // Letrero DISCO
             ctx.fillStyle = '#1e1b4b';
             ctx.fillRect(dx - 15, dy - 35, 120, 45);
             ctx.strokeStyle = '#00f0ff';
             ctx.strokeRect(dx - 15, dy - 35, 120, 45);
 
-            ctx.shadowColor = '#ff007f';
-            ctx.shadowBlur = 12;
             ctx.fillStyle = '#ff007f';
-            ctx.font = 'bold 16px "Press Start 2P"';
-            ctx.fillText("?????", dx + 2, dy - 10);
-
-            ctx.shadowColor = '#00ffcc';
-            ctx.font = 'bold 9px "Press Start 2P"';
-            ctx.fillStyle = '#00ffcc';
-            ctx.fillText("CLUB 90s", dx + 8, dy + 5);
-            ctx.shadowBlur = 0;
-
-            // 4. Luces Foco Disco Giratorias sobre el letrero
-            const time = Date.now() * 0.005;
-            ctx.fillStyle = 'rgba(236, 72, 153, 0.4)';
-            ctx.beginPath();
-            ctx.moveTo(dx + 10, dy - 35);
-            ctx.lineTo(dx - 40 + Math.sin(time) * 20, dy - 90);
-            ctx.lineTo(dx + 30 + Math.sin(time) * 20, dy - 90);
-            ctx.fill();
-
-            ctx.fillStyle = 'rgba(6, 182, 212, 0.4)';
-            ctx.beginPath();
-            ctx.moveTo(dx + 80, dy - 35);
-            ctx.lineTo(dx + 40 + Math.cos(time) * 20, dy - 90);
-            ctx.lineTo(dx + 110 + Math.cos(time) * 20, dy - 90);
-            ctx.fill();
-
-            // 5. Postes Dorados y Cuerda de Terciopelo Rojo de la Entrada
-            ctx.fillStyle = '#fbbf24';
-            ctx.fillRect(dx - 25, dy + 65, 6, 35);
-            ctx.fillRect(dx + 109, dy + 65, 6, 35);
-            ctx.beginPath();
-            ctx.arc(dx - 22, dy + 63, 6, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath();
-            ctx.arc(dx + 112, dy + 63, 6, 0, Math.PI * 2); ctx.fill();
-
-            // Cuerda de terciopelo
-            ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(dx - 22, dy + 68);
-            ctx.quadraticCurveTo(dx + 45, dy + 88, dx + 112, dy + 68);
-            ctx.stroke();
+            ctx.font = 'bold 14px "Press Start 2P"';
+            ctx.fillText("?????", dx + 8, dy - 10);
         }
 
-        // Bucle Principal
         function gameLoop() {
             update();
             render();
@@ -876,6 +804,7 @@
 
         function startGame() {
             initAudio();
+            resizeCanvas();
             initLevel();
             document.getElementById('startOverlay').classList.add('hidden');
             document.getElementById('winOverlay').classList.add('hidden');
@@ -883,11 +812,12 @@
             startBGM();
         }
 
-        // Ajustar tamaño del canvas dinámicamente
         function resizeCanvas() {
             const container = canvas.parentElement;
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
+            groundY = canvas.height - 40;
+            if (discoDoor) discoDoor.y = groundY - 110;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -905,7 +835,6 @@
             if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') keys.up = false;
         });
 
-        // Eventos táctiles para pantalla móvil
         const btnLeft = document.getElementById('btnLeft');
         const btnRight = document.getElementById('btnRight');
         const btnJump = document.getElementById('btnJump');
@@ -921,15 +850,11 @@
         addTouchEvents(btnRight, 'right');
         addTouchEvents(btnJump, 'up');
 
-        // Botón Activar / Desactivar Sonido
         document.getElementById('audioToggleBtn').addEventListener('click', () => {
             isMuted = !isMuted;
             document.getElementById('audioToggleBtn').innerText = isMuted ? '🔇 MUTE' : '🔊 SONIDO';
-            if (isMuted) {
-                stopBGM();
-            } else if (isGameRunning) {
-                startBGM();
-            }
+            if (isMuted) stopBGM();
+            else if (isGameRunning) startBGM();
         });
 
         document.getElementById('startBtn').addEventListener('click', startGame);
