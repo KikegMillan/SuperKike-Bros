@@ -140,7 +140,7 @@
     </main>
 
     <!-- CONTROLES TÁCTILES EXTRA GRANDES Y SEPARADOS (ELEVADOS LIGERAMENTE PARA MEJOR ERGONOMÍA) -->
-    <footer class="w-full bg-slate-900/95 border-t-2 border-cyan-500/50 px-4 pt-3 pb-12 shrink-0 z-20 touch-none shadow-2xl">
+    <footer class="w-full bg-slate-900/95 border-t-2 border-cyan-500/50 px-4 pt-3 pb-16 shrink-0 z-20 touch-none shadow-2xl">
         <div class="max-w-md mx-auto flex justify-between items-center gap-4 mb-1">
             <!-- BOTONES DIRECCIONALES (IZQUIERDA / DERECHA) -->
             <div class="flex gap-4">
@@ -224,8 +224,9 @@
         // Sonido Romper Bloque
         function playBreakSound() {
             if (isMuted || !audioCtx) return;
-            playTone(160, 'sawtooth', 0.08, 0.15, 0);
-            playTone(100, 'sawtooth', 0.08, 0.15, 0.04);
+            playTone(180, 'sawtooth', 0.1, 0.2, 0);
+            playTone(120, 'square', 0.12, 0.2, 0.03);
+            playTone(70, 'triangle', 0.15, 0.25, 0.06);
         }
 
         // Fanfarria Victoria Estilo Mario Stage Clear
@@ -416,11 +417,13 @@
         let blocks = [];
         let coins = [];
         let beers = [];
+        let particles = [];
         let discoDoor = { x: 2150, y: 0, width: 90, height: 110 };
 
         function initLevel() {
             score = 0;
             beersCollected = 0;
+            particles = [];
             updateHUD();
 
             groundY = canvas.height - 40;
@@ -476,6 +479,31 @@
             ];
 
             beers = [];
+        }
+
+        function createBrickDebris(x, y, width, height) {
+            const cols = 2;
+            const rows = 2;
+            const pWidth = width / cols;
+            const pHeight = height / rows;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    particles.push({
+                        x: x + c * pWidth,
+                        y: y + r * pHeight,
+                        width: pWidth,
+                        height: pHeight,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: -Math.random() * 5 - 2,
+                        gravity: 0.35,
+                        color: '#b45309',
+                        borderColor: '#78350f',
+                        life: 1.0,
+                        decay: 0.03 + Math.random() * 0.02
+                    });
+                }
+            }
         }
 
         function updateHUD() {
@@ -569,20 +597,27 @@
                 }
             });
 
+            // Partículas de bloques rotos
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.vy += p.gravity;
+                p.y += p.vy;
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
             // Meta Discoteca
             if (isColliding(player, discoDoor)) {
                 if (beersCollected >= 1) {
                     winGame();
                 } else {
-                    player.x = discoDoor.x - player.width - 10;
                     showBeerWarning();
+                    player.x = discoDoor.x - player.width - 5;
                 }
             }
-
-            // Cámara adaptada para visualización vertical centrada
-            cameraX = player.x - canvas.width / 2 + player.width / 2;
-            if (cameraX < 0) cameraX = 0;
-            if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width;
         }
 
         function makePlayerBig() {
@@ -590,6 +625,15 @@
             player.width = 44;
             player.height = 56;
             player.y -= 14;
+        }
+
+        function isColliding(rect1, rect2) {
+            return (
+                rect1.x < rect2.x + rect2.width &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y
+            );
         }
 
         function checkCollisionX() {
@@ -604,16 +648,17 @@
         function checkCollisionY() {
             blocks.forEach((b, index) => {
                 if (isColliding(player, b)) {
-                    if (player.vy > 0) {
+                    if (player.vy > 0) { // Cayendo
                         player.y = b.y - player.height;
                         player.vy = 0;
                         player.isGrounded = true;
-                    } else if (player.vy < 0) {
+                    } else if (player.vy < 0) { // Saltando desde abajo
                         player.y = b.y + b.height;
                         player.vy = 0;
 
                         if (b.type === 'brick') {
                             if (player.isBig) {
+                                createBrickDebris(b.x, b.y, b.width, b.height);
                                 blocks.splice(index, 1);
                                 score += 50;
                                 updateHUD();
@@ -621,10 +666,20 @@
                             }
                         } else if (b.type === 'beer_question' && !b.hit) {
                             b.hit = true;
-                            beers.push({ x: b.x + 4, y: b.y - 28, width: 24, height: 24, vx: 1, vy: -3, collected: false });
+                            b.type = 'empty';
+                            beers.push({
+                                x: b.x + 4,
+                                y: b.y - 24,
+                                width: 24,
+                                height: 24,
+                                vx: 1.5,
+                                vy: -3,
+                                collected: false
+                            });
                             playPowerupSound();
                         } else if (b.type === 'question' && !b.hit) {
                             b.hit = true;
+                            b.type = 'empty';
                             score += 200;
                             updateHUD();
                             playPowerupSound();
@@ -634,77 +689,77 @@
             });
         }
 
-        function isColliding(a, b) {
-            return a.x < b.x + b.width &&
-                   a.x + a.width > b.x &&
-                   a.y < b.y + b.height &&
-                   a.y + a.height > b.y;
-        }
-
         // --- RENDERIZADO ---
         function render() {
+            // Ajustar cámara para seguir al jugador
+            cameraX = player.x - canvas.width / 3;
+            if (cameraX < 0) cameraX = 0;
+            if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Fondo de cielo estrellado estilo retro
+            ctx.fillStyle = '#090514';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ctx.save();
-            ctx.translate(-Math.floor(cameraX), 0);
+            ctx.translate(-cameraX, 0);
 
-            // 1. Fondo Madrid Cyberpunk
-            drawMadridBackground();
-
-            // 2. Suelo Retro
+            // 1. Suelo
             ctx.fillStyle = '#1e1b4b';
             ctx.fillRect(0, groundY, levelWidth, canvas.height - groundY);
             ctx.fillStyle = '#06b6d4';
             ctx.fillRect(0, groundY, levelWidth, 4);
 
-            // Rejilla Suelo
-            ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
-            ctx.lineWidth = 1;
-            for (let x = 0; x < levelWidth; x += 32) {
-                ctx.beginPath();
-                ctx.moveTo(x, groundY);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-
-            // 3. Bloques
+            // 2. Bloques
             blocks.forEach(b => {
-                if (b.type === 'solid') {
-                    ctx.fillStyle = '#334155';
-                    ctx.fillRect(b.x, b.y, b.width, b.height);
-                    ctx.strokeStyle = '#64748b';
-                    ctx.strokeRect(b.x, b.y, b.width, b.height);
-                } else if (b.type === 'brick') {
+                if (b.type === 'brick') {
                     ctx.fillStyle = '#b45309';
                     ctx.fillRect(b.x, b.y, b.width, b.height);
                     ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 2;
                     ctx.strokeRect(b.x, b.y, b.width, b.height);
-                } else if (b.type === 'beer_question' || b.type === 'question') {
+                } else if (b.type === 'question' || b.type === 'beer_question') {
                     ctx.fillStyle = b.hit ? '#475569' : '#eab308';
                     ctx.fillRect(b.x, b.y, b.width, b.height);
-                    ctx.strokeStyle = '#fef08a';
+                    ctx.strokeStyle = '#ca8a04';
+                    ctx.lineWidth = 2;
                     ctx.strokeRect(b.x, b.y, b.width, b.height);
+
                     if (!b.hit) {
-                        ctx.fillStyle = '#0f172a';
+                        ctx.fillStyle = '#78350f';
                         ctx.font = 'bold 16px "Press Start 2P"';
-                        ctx.fillText('?', b.x + 8, b.y + 23);
+                        ctx.fillText('?', b.x + 8, b.y + 22);
                     }
+                } else if (b.type === 'empty') {
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(b.x, b.y, b.width, b.height);
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(b.x, b.y, b.width, b.height);
+                } else if (b.type === 'solid') {
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(b.x, b.y, b.width, b.height);
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(b.x, b.y, b.width, b.height);
                 }
             });
 
-            // 4. Monedas
+            // 3. Monedas
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.fillStyle = '#facc15';
                     ctx.beginPath();
-                    ctx.arc(c.x + 8, c.y + 8, 7, 0, Math.PI * 2);
+                    ctx.arc(c.x + 8, c.y + 8, 8, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.strokeStyle = '#ca8a04';
+                    ctx.lineWidth = 2;
                     ctx.stroke();
                 }
             });
 
-            // 5. Cervezas
+            // 4. Cervezas
             beers.forEach(b => {
                 if (!b.collected) {
                     ctx.fillStyle = '#f59e0b';
@@ -714,80 +769,120 @@
                 }
             });
 
+            // 5. Partículas (Escombros)
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                ctx.strokeStyle = p.borderColor;
+                ctx.strokeRect(p.x, p.y, p.width, p.height);
+                ctx.restore();
+            });
+
             // 6. Entrada Discoteca
             drawDiscotecaEntrance();
 
             // 7. Jugador
-            const spriteImg = player.isBig ? imgKikeBeer : imgKikeNormal;
+            const currentImg = player.isBig ? imgKikeBeer : imgKikeNormal;
+
             ctx.save();
             if (!player.facingRight) {
                 ctx.translate(player.x + player.width, player.y);
                 ctx.scale(-1, 1);
-                ctx.drawImage(spriteImg, 0, 0, player.width, player.height);
+                ctx.drawImage(currentImg, 0, 0, player.width, player.height);
             } else {
-                ctx.drawImage(spriteImg, player.x, player.y, player.width, player.height);
+                ctx.drawImage(currentImg, player.x, player.y, player.width, player.height);
             }
             ctx.restore();
 
             ctx.restore();
         }
 
-        function drawMadridBackground() {
-            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            grad.addColorStop(0, '#020617');
-            grad.addColorStop(0.6, '#1e1b4b');
-            grad.addColorStop(1, '#311042');
-            ctx.fillStyle = grad;
-            ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
-
-            // Luna Neón
-            ctx.fillStyle = '#ff007f';
-            ctx.beginPath();
-            ctx.arc(cameraX + canvas.width - 60, 60, 25, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Título Flotante Neón
-            ctx.fillStyle = '#00f0ff';
-            ctx.font = '10px "Press Start 2P"';
-            ctx.fillText("KIKE's 50s - MADRID", cameraX + 20, 35);
-
-            // Torres Kio
-            ctx.fillStyle = '#0f172a';
-            ctx.save();
-            ctx.translate(600, groundY);
-            ctx.transform(1, 0, 0.25, 1, 0, 0);
-            ctx.fillRect(0, -180, 50, 180);
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(760, groundY);
-            ctx.transform(1, 0, -0.25, 1, 0, 0);
-            ctx.fillRect(0, -180, 50, 180);
-            ctx.restore();
-        }
-
         function drawDiscotecaEntrance() {
             const dx = discoDoor.x;
             const dy = discoDoor.y;
+            const time = Date.now() * 0.005;
 
+            // Edificio Discoteca Neón
+            ctx.fillStyle = '#0a0a16';
+            ctx.fillRect(dx - 30, dy - 60, 150, 170);
+            
+            // Borde Arco Neón Animado
+            const neonHue = Math.floor((Date.now() / 10) % 360);
+            ctx.strokeStyle = `hsl(${neonHue}, 100%, 50%)`;
+            ctx.lineWidth = 4;
+            ctx.strokeRect(dx - 30, dy - 60, 150, 170);
+
+            // Altavoces a los lados
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(dx - 25, dy, 18, 50);
+            ctx.fillRect(dx + 97, dy, 18, 50);
             ctx.fillStyle = '#0f172a';
-            ctx.fillRect(dx - 20, dy - 40, 130, 150);
-            ctx.strokeStyle = '#ec4899';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(dx - 20, dy - 40, 130, 150);
+            ctx.beginPath();
+            ctx.arc(dx - 16, dy + 15, 6, 0, Math.PI * 2);
+            ctx.arc(dx - 16, dy + 35, 6, 0, Math.PI * 2);
+            ctx.arc(dx + 106, dy + 15, 6, 0, Math.PI * 2);
+            ctx.arc(dx + 106, dy + 35, 6, 0, Math.PI * 2);
+            ctx.fill();
 
+            // Puerta con cortina / luces
             ctx.fillStyle = '#0284c7';
             ctx.fillRect(dx, dy + 20, 90, 90);
+            ctx.fillStyle = 'rgba(236, 72, 153, 0.4)';
+            ctx.fillRect(dx + 5, dy + 25, 80, 85);
 
-            // Letrero DISCO
-            ctx.fillStyle = '#1e1b4b';
-            ctx.fillRect(dx - 15, dy - 35, 120, 45);
+            // Bola de Discoteca Giratoria
+            const ballX = dx + 45;
+            const ballY = dy - 80;
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(ballX, dy - 95);
+            ctx.lineTo(ballX, ballY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#64748b';
+            ctx.stroke();
+
+            // Destellos de la bola de discoteca
+            for (let i = 0; i < 6; i++) {
+                const angle = time + (i * Math.PI / 3);
+                const lx = ballX + Math.cos(angle) * 35;
+                const ly = ballY + Math.sin(angle) * 25;
+                ctx.strokeStyle = i % 2 === 0 ? 'rgba(0, 240, 255, 0.6)' : 'rgba(255, 0, 127, 0.6)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(ballX, ballY);
+                ctx.lineTo(lx, ly);
+                ctx.stroke();
+            }
+
+            // Cartel Luminoso DISCO
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(dx - 25, dy - 55, 140, 45);
             ctx.strokeStyle = '#00f0ff';
-            ctx.strokeRect(dx - 15, dy - 35, 120, 45);
+            ctx.lineWidth = 2;
+            ctx.strokeRect(dx - 25, dy - 55, 140, 45);
 
+            // Luces parpadeantes en el marco del cartel
+            for (let lx = dx - 20; lx <= dx + 110; lx += 15) {
+                const isBright = Math.sin(time * 2 + lx) > 0;
+                ctx.fillStyle = isBright ? '#facc15' : '#475569';
+                ctx.beginPath();
+                ctx.arc(lx, dy - 50, 2.5, 0, Math.PI * 2);
+                ctx.arc(lx, dy - 15, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Texto DISCO
             ctx.fillStyle = '#ff007f';
-            ctx.font = 'bold 14px "Press Start 2P"';
-            ctx.fillText("?????", dx + 8, dy - 10);
+            ctx.font = 'bold 9px "Press Start 2P"';
+            ctx.fillText("DISCO 50s", dx - 18, dy - 28);
         }
 
         function gameLoop() {
