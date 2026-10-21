@@ -84,7 +84,7 @@
     <header class="w-full bg-slate-900 border-b-2 border-fuchsia-500 p-2 flex justify-between items-center text-[10px] sm:text-xs text-amber-300 z-20 shrink-0">
         <div class="font-bold text-pink-500">KIKE's 50s</div>
         <div id="scoreDisplay">PTS: 00000</div>
-        <div id="beerDisplay">🍺: 0/1</div>
+        <div id="beerDisplay">🍺: 0/2</div>
         <button id="audioToggleBtn" class="bg-slate-800 text-cyan-400 border border-cyan-400 px-2 py-1 rounded text-[9px] hover:bg-slate-700 active:scale-95">🔊 SONIDO</button>
     </header>
 
@@ -94,15 +94,16 @@
         <canvas id="gameCanvas" class="w-full h-full block object-cover"></canvas>
 
         <!-- ALERTA CERVEZA NECESARIA -->
-        <div id="beerWarningMsg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-3 rounded-xl text-xs border-2 border-white shadow-2xl z-30 text-center animate-bounce w-11/12 max-w-xs">
-            🍺 ¡Necesitas al menos 1 cerveza para entrar a la discoteca!
+        <!-- <div id="beerWarningMsg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-3 rounded-xl text-xs border-2 border-white shadow-2xl z-30 text-center animate-bounce w-11/12 max-w-xs"> -->
+        <div id="beerWarningMsg" class="hidden absolute top-4 left-4 bg-amber-500 text-slate-950 font-bold px-4 py-3 rounded-xl text-xs border-2 border-white shadow-2xl z-30 text-center animate-bounce w-11/12 max-w-xs">    
+            🍺 ¡Necesitas al menos 1 cerveza para entrar en el bar!
         </div>
 
         <!-- PANTALLA INICIAL DE PRESENTACIÓN -->
         <div id="startOverlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-40">
             <h1 class="text-2xl sm:text-4xl text-pink-500 mb-4 neon-text font-bold">KIKE's 50s</h1>
             <p class="text-[10px] sm:text-xs text-cyan-300 mb-8 max-w-xs leading-relaxed">
-                ¡Supera el nivel en Madrid! Rompe bloques, tómate la Cerveza Especial para hacerte gigante y entra en la Discoteca.
+                ¡Supera el nivel en Madrid! Rompe bloques, tómate la Cerveza Especial para hacerte gigante y entra en la Fiesta!!!.
             </p>
 
             <button id="startBtn" class="bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black px-8 py-5 rounded-2xl text-sm shadow-2xl transform transition active:scale-95 border-4 border-white tracking-wider">
@@ -113,7 +114,7 @@
         <!-- OVERLAY DE RECOMPENSA / VICTORIA -->
         <div id="winOverlay" class="hidden absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-6 text-center z-40">
             <h2 class="text-sm sm:text-lg text-yellow-400 mb-4 tracking-wider neon-text font-bold">
-                ¡NIVEL 1 SUPERADO!
+                ¡RETO SUPERADO!
             </h2>
             <p class="text-[10px] sm:text-xs text-slate-200 mb-4 max-w-xs leading-relaxed">
                 Has reunido todas las jarras de cerveza para la gran fiesta.
@@ -125,12 +126,12 @@
                     FECHA DESBLOQUEADA:
                 </p>
                 <p class="text-xs sm:text-sm text-cyan-300 font-extrabold tracking-wider border-y-2 border-cyan-400/40 py-2">
-                    SÁBADO 14 DE NOVIEMBRE
+                    SÁBADO 14 DE NOVIEMBRE 21:30
                 </p>
             </div>
 
             <p class="text-[9px] text-emerald-400 animate-pulse max-w-xs leading-relaxed mb-6">
-                Próximamente recibirás el siguiente juego para descubrir la hora
+                Próximamente recibirás el siguiente juego para descubrir más...
             </p>
 
             <button id="restartBtn" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-xl text-xs border-2 border-white shadow-lg active:scale-95">
@@ -882,7 +883,7 @@
             // Texto DISCO
             ctx.fillStyle = '#ff007f';
             ctx.font = 'bold 9px "Press Start 2P"';
-            ctx.fillText("DISCO 50s", dx - 18, dy - 28);
+            ctx.fillText("KIKE's 50s CLUB", dx - 18, dy - 28);
         }
 
         function gameLoop() {
