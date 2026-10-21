@@ -1,348 +1,819 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Nivel 1: Kike Bros (Mobile)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-    }
-    body {
-      background-color: #0d0d0d;
-      color: #00ffcc;
-      font-family: 'Press Start 2P', monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 10px;
-      overflow: hidden;
-    }
-    h1 {
-      font-size: 14px;
-      color: #ff0055;
-      text-shadow: 2px 2px #fff;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-    #game-container {
-      position: relative;
-      border: 3px solid #00ffcc;
-      box-shadow: 0 0 15px #00ffcc;
-      background: #111;
-      width: 100%;
-      max-width: 360px; /* Formato móvil vertical */
-      aspect-ratio: 9 / 16;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    canvas {
-      display: block;
-      width: 100%;
-      height: 78%;
-      background: linear-gradient(to bottom, #111 0%, #220033 100%);
-    }
-
-    /* Panel de controles táctiles */
-    .touch-controls {
-      height: 22%;
-      background: #000;
-      border-top: 2px solid #00ffcc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-    }
-    .d-pad {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-touch {
-      background: #222;
-      border: 2px solid #00ffcc;
-      color: #00ffcc;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 16px;
-      width: 55px;
-      height: 55px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px #00a887;
-    }
-    .btn-touch:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px #00a887;
-      background: #00ffcc;
-      color: #000;
-    }
-    .btn-jump {
-      background: #ff0055;
-      border-color: #fff;
-      color: #fff;
-      width: 70px;
-      height: 55px;
-      font-size: 10px;
-      box-shadow: 0 4px #aa0038;
-    }
-    .btn-jump:active {
-      box-shadow: 0 2px #aa0038;
-      background: #fff;
-      color: #ff0055;
-    }
-
-    .custom-photo-btn {
-      margin-top: 8px;
-      font-size: 8px;
-      color: #fff;
-      background: #ff0055;
-      border: 2px solid #fff;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-family: 'Press Start 2P', monospace;
-    }
-
-    /* Modal de victoria */
-    #victory-screen {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.92);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
-      z-index: 10;
-    }
-    #victory-screen h2 {
-      color: #ffcc00;
-      font-size: 14px;
-      margin-bottom: 15px;
-      animation: blink 1s infinite;
-    }
-    #victory-screen p {
-      color: #fff;
-      font-size: 10px;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-    #victory-screen .date-reveal {
-      color: #00ffcc;
-      font-size: 12px;
-      background: #222;
-      border: 2px dashed #00ffcc;
-      padding: 12px;
-      margin: 10px 0;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-  </style>
+<!-- ... existing code ... -->
+    <title>KIKE's 50s - Super Plataformas Retro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Press Start 2P para estética 8-bit / 16-bit -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background-color: #0b0813;
+            color: #fff;
+            overflow: hidden;
+        /* Styles remain the same */
+        .pixel-border {
+            border: 4px solid #00ffcc;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5), inset 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+        .retro-box {
+            background-color: #161224;
+            border: 3px dashed #00e5ff;
+        }
+        @keyframes neonGlow {
+            0%, 100% { text-shadow: 0 0 5px #ff0055, 0 0 10px #ff0055, 0 0 20px #ff0055; }
+            50% { text-shadow: 0 0 2px #ff0055, 0 0 5px #ff0055, 0 0 8px #ff0055; }
+        }
+        .neon-text {
+            animation: neonGlow 1.5s infinite alternate;
+        }
+        .btn-touch {
+            background: linear-gradient(180deg, #ff007f 0%, #a60053 100%);
+            border: 3px solid #fff;
+            box-shadow: 0 5px 0 #500028, 0 0 10px rgba(255, 0, 127, 0.6);
+        }
+        .btn-touch:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #500028;
+        }
+        .btn-dir {
+            background: linear-gradient(180deg, #00d2ff 0%, #0077b6 100%);
+            border: 3px solid #fff;
+            box-shadow: 0 5px 0 #004066, 0 0 10px rgba(0, 210, 255, 0.6);
+        }
+        .btn-dir:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #004066;
+        }
+    </style>
 </head>
-<body>
+<body class="flex flex-col items-center justify-between h-screen w-screen p-2 sm:p-4 select-none">
 
-  <h1>NIVEL 1: KIKE BROS</h1>
-
-  <div id="game-container">
-    <canvas id="gameCanvas" width="320" height="420"></canvas>
-    
-    <!-- Controles Táctiles Móvil -->
-    <div class="touch-controls">
-      <div class="d-pad">
-        <button class="btn-touch" id="btn-left">◄</button>
-        <button class="btn-touch" id="btn-right">►</button>
-      </div>
-      <button class="btn-touch btn-jump" id="btn-jump">SALTAR</button>
+    <!-- CABECERA CON PUNTUACIÓN Y TIEMPO -->
+    <div class="w-full max-w-4xl flex justify-between items-center bg-slate-900/90 border-2 border-fuchsia-500 rounded-lg p-2 sm:p-3 text-[10px] sm:text-xs text-amber-300 shadow-lg z-10">
+        <div>KIKE'S 50s</div>
+        <div id="scoreDisplay">PUNTOS: 00000</div>
+        <div id="beerDisplay">🍺: 0/1</div>
+        <button id="audioToggleBtn" class="bg-slate-800 text-cyan-400 border border-cyan-400 px-2 py-1 rounded text-[9px] hover:bg-slate-700">🔊 SONIDO</button>
     </div>
 
-    <!-- Pantalla de Victoria -->
-    <div id="victory-screen">
-      <h2>¡NIVEL 1 SUPERADO!</h2>
-      <p>Has reunido todas las jarras de cerveza para la fiesta.</p>
-      <div class="date-reveal">FECHA DESBLOQUEADA:<br><br><strong>SÁBADO 14 DE NOVIEMBRE</strong></div>
-      <p style="font-size: 8px; color: #888; margin-top: 10px;">¡Pasa al Nivel 2 para descubrir la hora!</p>
+    <!-- PANTALLA PRINCIPAL DEL JUEGO / CANVAS -->
+    <div class="relative flex-1 w-full max-w-4xl flex items-center justify-center my-2 overflow-hidden">
+        <canvas id="gameCanvas" class="bg-black rounded-lg shadow-2xl border-2 border-cyan-500 w-full h-full object-contain"></canvas>
+
+        <!-- MENSAJE MUTE/ALERTA DE CERVEZA NECESARIA -->
+        <div id="beerWarningMsg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-md text-[10px] sm:text-xs border-2 border-white shadow-xl z-20 text-center animate-bounce">
+            🍺 ¡Necesitas al menos 1 cerveza para entrar a la discoteca!
+        </div>
+
+        <!-- PANTALLA INICIAL DE PRESENTACIÓN -->
+        <div id="startOverlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20 rounded-lg border-2 border-pink-500">
+            <h1 class="text-xl sm:text-3xl text-pink-500 mb-3 neon-text">KIKE's 50s</h1>
+            <p class="text-[10px] sm:text-xs text-cyan-300 mb-6 max-w-md leading-relaxed">
+                Supera el nivel en Madrid, destruye bloques, tómate la Cerveza Especial para volverte gigante y entra a la Discoteca.
+            </p>
+
+            <button id="startBtn" class="bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-bold px-6 py-4 rounded-md text-xs sm:text-sm shadow-lg transform transition active:scale-95 border-2 border-white">
+                ¡EMPEZAR JUEGO!
+            </button>
+        </div>
+
+        <!-- OVERLAY DE RECOMPENSA / VICTORIA -->
+        <div id="winOverlay" class="hidden absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-4 text-center z-30 rounded-lg">
+            <h2 class="text-sm sm:text-base text-yellow-400 mb-4 tracking-wider neon-text">
+                ¡NIVEL 1 SUPERADO!
+            </h2>
+            <p class="text-[10px] sm:text-xs text-slate-200 mb-6 max-w-xs sm:max-w-md leading-relaxed">
+                Has reunido todas las jarras de cerveza para la fiesta.
+            </p>
+
+            <!-- CAJA ESTILO MENSAJE DE RECOMPENSA -->
+            <div class="retro-box p-4 sm:p-6 rounded-lg mb-6 max-w-sm sm:max-w-md w-full shadow-2xl">
+                <p class="text-[10px] sm:text-xs text-cyan-400 mb-2 font-bold tracking-widest">
+                    FECHA DESBLOQUEADA:
+                </p>
+                <p class="text-xs sm:text-sm text-cyan-300 font-extrabold tracking-wider border-y-2 border-cyan-400/40 py-2">
+                    SÁBADO 14 DE NOVIEMBRE
+                </p>
+            </div>
+
+            <p class="text-[9px] sm:text-[11px] text-emerald-400 animate-pulse max-w-xs leading-relaxed mb-6">
+                Próximamente recibirás el siguiente juego para descubrir la hora
+            </p>
+
+            <button id="restartBtn" class="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded text-[10px] sm:text-xs border border-white shadow-md">
+                JUGAR DE NUEVO
+            </button>
+        </div>
     </div>
-  </div>
 
-  <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="loadCustomPhoto(event)">
-  <button class="custom-photo-btn" onclick="document.getElementById('photoInput').click()">📷 SUBIR FOTO DE KIKE</button>
+    <!-- CONTROLES TÁCTILES PARA MÓVIL -->
+    <div class="w-full max-w-4xl flex justify-between items-center px-2 py-1 sm:py-2 z-10 select-none">
+        <!-- D-PAD IZQUIERDA / DERECHA -->
+        <div class="flex gap-2 sm:gap-3">
+            <button id="btnLeft" class="btn-dir w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold active:bg-cyan-600">
+                ◄
+            </button>
+            <button id="btnRight" class="btn-dir w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold active:bg-cyan-600">
+                ►
+            </button>
+        </div>
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+        <!-- BOTÓN DE SALTO -->
+        <div>
+            <button id="btnJump" class="btn-touch w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold active:bg-pink-700">
+                SALTO
+            </button>
+        </div>
+    </div>
 
-    let gameOver = false;
-    let score = 0;
-    const targetScore = 3;
+    <!-- LÓGICA COMPLETA DEL JUEGO JS CON SINTETIZADOR 8-BIT -->
+    <script>
+        // --- SISTEMA DE AUDIO SINTETIZADOR 8-BIT (Web Audio API) ---
+        class RetroAudio {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+                this.musicTimer = null;
+                this.noteIndex = 0;
+            }
 
-    // Foto del personaje
-    let playerImg = new Image();
-    playerImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="14" fill="%23ff0055"/><circle cx="10" cy="10" r="3" fill="%23fff"/><circle cx="20" cy="10" r="3" fill="%23fff"/><path d="M 8 20 Q 15 26 22 20" stroke="%23fff" stroke-width="2" fill="none"/></svg>';
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
 
-    function loadCustomPhoto(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) { playerImg.src = evt.target.result; };
-        reader.readAsDataURL(file);
-      }
-    }
+            // Efecto de Sonido de Salto Retro (Frecuencia subiendo rápido)
+            playJump() {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                
+                const now = this.ctx.currentTime;
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
 
-    // Jugador
-    const player = {
-      x: 20, y: 350,
-      width: 26, height: 26,
-      vx: 0, vy: 0,
-      speed: 3, jumpPower: -9,
-      gravity: 0.42, grounded: false
-    };
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
 
-    // Estado de controles (Teclado y Táctil)
-    const keys = { right: false, left: false };
+                osc.start(now);
+                osc.stop(now + 0.12);
+            }
 
-    function jump() {
-      if (player.grounded) {
-        player.vy = player.jumpPower;
-        player.grounded = false;
-      }
-    }
+            // Efecto de Golpear/Romper Bloque
+            playBreak() {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
 
-    // Eventos Táctiles
-    const btnLeft = document.getElementById('btn-left');
-    const btnRight = document.getElementById('btn-right');
-    const btnJump = document.getElementById('btn-jump');
+                const now = this.ctx.currentTime;
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.1);
 
-    const addTouchEvents = (elem, onStart, onEnd) => {
-      elem.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
-      elem.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
-      elem.addEventListener('mousedown', onStart);
-      elem.addEventListener('mouseup', onEnd);
-    };
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
 
-    addTouchEvents(btnLeft, () => keys.left = true, () => keys.left = false);
-    addTouchEvents(btnRight, () => keys.right = true, () => keys.right = false);
-    addTouchEvents(btnJump, () => jump(), () => {});
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
 
-    // Eventos Teclado (Soporte PC)
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-      if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-      if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') jump();
-    });
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-      if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-    });
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
 
-    // Escenario Vertical (Plataformas)
-    const platforms = [
-      { x: 0, y: 395, width: 320, height: 25 },   // Suelo base
-      { x: 20, y: 320, width: 120, height: 10 },
-      { x: 180, y: 250, width: 120, height: 10 },
-      { x: 40, y: 180, width: 120, height: 10 },
-      { x: 160, y: 110, width: 130, height: 10 }
-    ];
+            // Efecto Cerveza / Power-up
+            playPowerup() {
+                if (!this.enabled || !this.ctx) return;
+                const notes = [220, 277, 330, 440, 554, 659];
+                const now = this.ctx.currentTime;
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.05);
 
-    // Cervezas en plataformas superiores
-    const beers = [
-      { x: 230, y: 220, collected: false },
-      { x: 80, y: 150, collected: false },
-      { x: 220, y: 80, collected: false }
-    ];
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.05 + 0.08);
 
-    function drawBeer(x, y) {
-      ctx.fillStyle = '#ffcc00';
-      ctx.fillRect(x, y, 12, 16);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(x, y, 12, 4);
-      ctx.strokeStyle = '#ffcc00';
-      ctx.strokeRect(x + 12, y + 4, 3, 8);
-    }
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-    function update() {
-      if (gameOver) return;
+                    osc.start(now + idx * 0.05);
+                    osc.stop(now + idx * 0.05 + 0.08);
+                });
+            }
 
-      if (keys.right) player.vx = player.speed;
-      else if (keys.left) player.vx = -player.speed;
-      else player.vx = 0;
+            // Fanfarria Especial de Victoria al Finalizar
+            playVictory() {
+                if (!this.enabled || !this.ctx) return;
+                this.stopMusic();
+                const melody = [
+                    { f: 261.63, d: 0.15 }, { f: 329.63, d: 0.15 }, { f: 392.00, d: 0.15 },
+                    { f: 523.25, d: 0.3 },  { f: 392.00, d: 0.15 }, { f: 523.25, d: 0.6 }
+                ];
+                let now = this.ctx.currentTime;
+                melody.forEach(note => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(note.f, now);
 
-      player.vy += player.gravity;
-      player.x += player.vx;
-      player.y += player.vy;
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + note.d);
 
-      if (player.x < 0) player.x = 0;
-      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-      player.grounded = false;
-      platforms.forEach(plat => {
-        if (
-          player.x < plat.x + plat.width &&
-          player.x + player.width > plat.x &&
-          player.y + player.height >= plat.y &&
-          player.y + player.height <= plat.y + plat.height + player.vy
-        ) {
-          player.y = plat.y - player.height;
-          player.vy = 0;
-          player.grounded = true;
+                    osc.start(now);
+                    osc.stop(now + note.d);
+                    now += note.d + 0.03;
+                });
+            }
+
+            // Música de Fondo Chiptune 8-bit Divertida
+            startMusic() {
+                if (!this.enabled) return;
+                this.init();
+                this.stopMusic();
+
+                // Melodía alegre 8-bit estilo clásico
+                const melodyNotes = [
+                    261.63, 261.63, 0, 261.63, 0, 207.65, 261.63, 0,
+                    329.63, 0, 0, 0, 196.00, 0, 0, 0,
+                    261.63, 196.00, 0, 164.81, 220.00, 246.94, 220.00, 207.65,
+                    220.00, 261.63, 329.63, 392.00, 329.63, 261.63, 196.00, 0
+                ];
+
+                this.noteIndex = 0;
+                this.musicTimer = setInterval(() => {
+                    if (!this.enabled || !this.ctx) return;
+                    const freq = melodyNotes[this.noteIndex];
+                    if (freq > 0) {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'pulse' in osc ? 'pulse' : 'square';
+                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 0.12);
+                    }
+                    this.noteIndex = (this.noteIndex + 1) % melodyNotes.length;
+                }, 140);
+            }
+
+            stopMusic() {
+                if (this.musicTimer) {
+                    clearInterval(this.musicTimer);
+                    this.musicTimer = null;
+                }
+            }
         }
-      });
 
-      beers.forEach(beer => {
-        if (!beer.collected) {
-          if (
-            player.x < beer.x + 15 &&
-            player.x + player.width > beer.x &&
-            player.y < beer.y + 16 &&
-            player.y + player.height > beer.y
-          ) {
-            beer.collected = true;
-            score++;
-            if (score >= targetScore) winGame();
-          }
+        const audio = new RetroAudio();
+
+        // Control de Sonido Mute / Unmute
+        document.getElementById('audioToggleBtn').addEventListener('click', () => {
+            audio.init();
+            audio.enabled = !audio.enabled;
+            const btn = document.getElementById('audioToggleBtn');
+            btn.innerText = audio.enabled ? '🔊 SONIDO' : '🔇 MUTE';
+            if (!audio.enabled) {
+                audio.stopMusic();
+            } else if (gameState === 'PLAYING') {
+                audio.startMusic();
+            }
+        });
+
+        // Configuración Canvas
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const V_WIDTH = 480;
+        const V_HEIGHT = 270;
+        canvas.width = V_WIDTH;
+        canvas.height = V_HEIGHT;
+
+        // Imágenes del Personaje Nítidas basadas en el diseño real de Kike (Peto vaquero, pelo castaño, camiseta negra y jarra)
+        const charImgNormal = new Image();
+        charImgNormal.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 40'><!-- Pelo y Cabeza --><rect x='10' y='2' width='12' height='4' fill='%235c3a21'/><rect x='8' y='4' width='16' height='5' fill='%236e472a'/><rect x='6' y='6' width='6' height='4' fill='%234a2e19'/><rect x='8' y='8' width='16' height='10' fill='%23ffcc99'/><rect x='6' y='10' width='3' height='4' fill='%23e6b88a'/><rect x='10' y='11' width='3' height='3' fill='%23221100'/><rect x='19' y='11' width='3' height='3' fill='%23221100'/><rect x='11' y='15' width='10' height='2' fill='%23ffffff'/><rect x='12' y='16' width='8' height='1' fill='%23cc3333'/><!-- Camiseta Negra --><rect x='6' y='18' width='20' height='5' fill='%231a1a1a'/><!-- Peto Vaquero y Tirantes --><rect x='9' y='21' width='14' height='12' fill='%232b529a'/><rect x='10' y='21' width='2' height='7' fill='%23ffcc00'/><rect x='20' y='21' width='2' height='7' fill='%23ffcc00'/><rect x='11' y='22' width='10' height='11' fill='%231e3f7a'/><!-- Brazos y Manos --><rect x='4' y='20' width='5' height='7' fill='%23ffcc99'/><rect x='23' y='20' width='5' height='7' fill='%23ffcc99'/><!-- Piernas y Zapatos --><rect x='10' y='33' width='5' height='5' fill='%231e3f7a'/><rect x='17' y='33' width='5' height='5' fill='%231e3f7a'/><rect x='8' y='37' width='7' height='3' fill='%23111111'/><rect x='17' y='37' width='7' height='3' fill='%23111111'/></svg>";
+
+        // Personaje Gigante (Super Kike con Cerveza)
+        const charImgBig = new Image();
+        charImgBig.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'><!-- Pelo y Cabeza --><rect x='10' y='2' width='14' height='5' fill='%235c3a21'/><rect x='8' y='5' width='18' height='6' fill='%236e472a'/><rect x='6' y='8' width='6' height='4' fill='%234a2e19'/><rect x='8' y='10' width='18' height='11' fill='%23ffcc99'/><rect x='10' y='13' width='3' height='3' fill='%23221100'/><rect x='20' y='13' width='3' height='3' fill='%23221100'/><rect x='11' y='17' width='12' height='3' fill='%23ffffff'/><rect x='12' y='18' width='10' height='1' fill='%23cc3333'/><!-- Camiseta Negra --><rect x='6' y='21' width='22' height='5' fill='%231a1a1a'/><!-- Peto Vaquero y Tirantes --><rect x='9' y='24' width='16' height='13' fill='%232b529a'/><rect x='10' y='24' width='3' height='8' fill='%23ffcc00'/><rect x='21' y='24' width='3' height='8' fill='%23ffcc00'/><rect x='12' y='25' width='10' height='12' fill='%231e3f7a'/><!-- Brazos e Izquierda --><rect x='3' y='22' width='6' height='8' fill='%23ffcc99'/><!-- Jarra de Cerveza Espumosa Grande --><rect x='28' y='18' width='18' height='6' fill='%23ffffff'/><rect x='29' y='24' width='15' height='16' fill='%23f2a612'/><rect x='31' y='26' width='3' height='12' fill='%23ffe680'/><rect x='38' y='28' width='8' height='9' stroke='%23ffffff' stroke-width='3' fill='none'/><rect x='26' y='27' width='6' height='7' fill='%23ffcc99'/><!-- Piernas y Zapatos --><rect x='10' y='37' width='6' height='5' fill='%231e3f7a'/><rect x='18' y='37' width='6' height='5' fill='%231e3f7a'/><rect x='8' y='41' width='8' height='3' fill='%23111111'/><rect x='18' y='41' width='8' height='3' fill='%23111111'/></svg>";
+
+        // State and Canvas Setup
+        let gameState = 'START';
+        let score = 0;
+        let beersCollected = 0;
+
+        // Entradas
+        const keys = { left: false, right: false, jump: false };
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+            if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w' || e.key === 'W') {
+                if (!keys.jump && player.grounded) {
+                    player.vy = -player.jumpForce;
+                    audio.playJump();
+                }
+                keys.jump = true;
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+            if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w' || e.key === 'W') keys.jump = false;
+        });
+
+        function bindTouchBtn(btnId, keyName) {
+            const btn = document.getElementById(btnId);
+            const startHandler = (e) => {
+                e.preventDefault();
+                audio.init();
+                keys[keyName] = true;
+                if (keyName === 'jump' && player.grounded) {
+                    player.vy = -player.jumpForce;
+                    audio.playJump();
+                }
+            };
+            const endHandler = (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+            };
+
+            btn.addEventListener('touchstart', startHandler);
+            btn.addEventListener('touchend', endHandler);
+            btn.addEventListener('mousedown', startHandler);
+            btn.addEventListener('mouseup', endHandler);
         }
-      });
-    }
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+        bindTouchBtn('btnLeft', 'left');
+        bindTouchBtn('btnRight', 'right');
+        bindTouchBtn('btnJump', 'jump');
 
-      // Plataformas
-      ctx.fillStyle = '#00ffcc';
-      platforms.forEach(plat => ctx.fillRect(plat.x, plat.y, plat.width, plat.height));
+        let cameraX = 0;
+        const gravity = 0.45;
 
-      // Cervezas
-      beers.forEach(beer => { if (!beer.collected) drawBeer(beer.x, beer.y); });
+        const player = {
+            x: 40,
+            y: 180,
+            baseW: 16,
+            baseH: 22,
+            w: 16,
+            h: 22,
+            vx: 0,
+            vy: 0,
+            speed: 2.2,
+            jumpForce: 7.8,
+            grounded: false,
+            isBig: false,
+            facing: 'right'
+        };
 
-      // Personaje
-      ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        const T_AIR = 0;
+        const T_SOLID = 1;
+        const T_BREAKABLE = 2;
+        const T_SPECIAL_BEER = 3;
+        const T_COIN = 4;
+        const T_DISCO = 5;
 
-      // UI
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '9px "Press Start 2P"';
-      ctx.fillText(`CERVEZAS: ${score}/${targetScore}`, 10, 20);
-    }
+        const TILE_SIZE = 16;
 
-    function winGame() {
-      gameOver = true;
-      document.getElementById('victory-screen').style.display = 'flex';
-    }
+        // Map layout updated with Discoteca door replacing the flag
+        const levelMap = [
+            "                                                                                   ",
+            "                                                                                   ",
+            "                                                                                   ",
+            "                                                  C C C                            ",
+            "                                                 22322                             ",
+            "                                                                                   ",
+            "                   C C C                         2 2 2                            ",
+            "                  22322       C C               111111                             ",
+            "                             11111                                 D               ",
+            "                                                                   D               ",
+            "         3                 111111               1111               D               ",
+            "       22222              11111111             111111              D               ",
+            "     11111111            1111111111           11111111             1               ",
+            "11111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            "11111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            "11111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+        ];
 
-    function gameLoop() {
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
+        let worldGrid = [];
+        let items = [];
+        let warningTimeout = null;
 
-    gameLoop();
-  </script>
+        function showBeerWarning() {
+            const warn = document.getElementById('beerWarningMsg');
+            warn.classList.remove('hidden');
+            if (warningTimeout) clearTimeout(warningTimeout);
+            warningTimeout = setTimeout(() => {
+                warn.classList.add('hidden');
+            }, 2500);
+        }
+
+        function parseLevel() {
+            worldGrid = [];
+            items = [];
+            for (let r = 0; r < levelMap.length; r++) {
+                let row = [];
+                for (let c = 0; c < levelMap[r].length; c++) {
+                    let char = levelMap[r][c];
+                    if (char === '1') row.push(T_SOLID);
+                    else if (char === '2') row.push(T_BREAKABLE);
+                    else if (char === '3') row.push(T_SPECIAL_BEER);
+                    else if (char === 'C') row.push(T_COIN);
+                    else if (char === 'D') row.push(T_DISCO);
+                    else row.push(T_AIR);
+                }
+                worldGrid.push(row);
+            }
+        }
+
+        function resetGame() {
+            parseLevel();
+            player.x = 30;
+            player.y = 180;
+            player.vx = 0;
+            player.vy = 0;
+            player.isBig = false;
+            player.w = player.baseW;
+            player.h = player.baseH;
+            score = 0;
+            beersCollected = 0;
+            cameraX = 0;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = `PUNTOS: ${String(score).padStart(5, '0')}`;
+            document.getElementById('beerDisplay').innerText = `🍺: ${beersCollected}/1`;
+        }
+
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            if (keys.left) {
+                player.vx = -player.speed;
+                player.facing = 'left';
+            } else if (keys.right) {
+                player.vx = player.speed;
+                player.facing = 'right';
+            } else {
+                player.vx *= 0.7;
+            }
+
+            player.vy += gravity;
+
+            player.x += player.vx;
+            checkCollisionX();
+
+            player.y += player.vy;
+            player.grounded = false;
+            checkCollisionY();
+
+            if (player.y > V_HEIGHT + 50) {
+                player.x = 40;
+                player.y = 100;
+                player.vy = 0;
+            }
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                let it = items[i];
+                if (it.type === 'beer') {
+                    it.vy += gravity * 0.5;
+                    it.y += it.vy;
+
+                    let row = Math.floor((it.y + it.h) / TILE_SIZE);
+                    let col = Math.floor((it.x + it.w / 2) / TILE_SIZE);
+                    if (getTile(col, row) === T_SOLID || getTile(col, row) === T_BREAKABLE) {
+                        it.y = row * TILE_SIZE - it.h;
+                        it.vy = 0;
+                    }
+
+                    if (rectIntersect(player.x, player.y, player.w, player.h, it.x, it.y, it.w, it.h)) {
+                        makePlayerBig();
+                        audio.playPowerup();
+                        items.splice(i, 1);
+                        beersCollected++;
+                        score += 500;
+                        updateUI();
+                    }
+                }
+            }
+
+            cameraX = Math.max(0, player.x - V_WIDTH / 3);
+        }
+
+        function makePlayerBig() {
+            player.isBig = true;
+            player.w = player.baseW * 1.5;
+            player.h = player.baseH * 1.5;
+            player.y -= 10;
+        }
+
+        function getTile(col, row) {
+            if (row < 0 || row >= worldGrid.length || col < 0 || col >= worldGrid[0].length) {
+                return T_AIR;
+            }
+            return worldGrid[row][col];
+        }
+
+        function setTile(col, row, val) {
+            if (row >= 0 && row < worldGrid.length && col >= 0 && col < worldGrid[0].length) {
+                worldGrid[row][col] = val;
+            }
+        }
+
+        function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
+            return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+        }
+
+        function checkCollisionX() {
+            let leftTile = Math.floor(player.x / TILE_SIZE);
+            let rightTile = Math.floor((player.x + player.w) / TILE_SIZE);
+            let topTile = Math.floor(player.y / TILE_SIZE);
+            let bottomTile = Math.floor((player.y + player.h - 1) / TILE_SIZE);
+
+            for (let r = topTile; r <= bottomTile; r++) {
+                for (let c = leftTile; c <= rightTile; c++) {
+                    let tile = getTile(c, r);
+                    if (tile === T_SOLID || tile === T_BREAKABLE || tile === T_SPECIAL_BEER) {
+                        if (player.vx > 0) {
+                            player.x = c * TILE_SIZE - player.w;
+                        } else if (player.vx < 0) {
+                            player.x = (c + 1) * TILE_SIZE;
+                        }
+                    } else if (tile === T_COIN) {
+                        setTile(c, r, T_AIR);
+                        score += 100;
+                        updateUI();
+                    } else if (tile === T_DISCO) {
+                        if (beersCollected > 0) {
+                            triggerWin();
+                        } else {
+                            showBeerWarning();
+                            player.x -= 8;
+                        }
+                    }
+                }
+            }
+        }
+
+        function checkCollisionY() {
+            let leftTile = Math.floor(player.x / TILE_SIZE);
+            let rightTile = Math.floor((player.x + player.w - 1) / TILE_SIZE);
+            let topTile = Math.floor(player.y / TILE_SIZE);
+            let bottomTile = Math.floor((player.y + player.h) / TILE_SIZE);
+
+            for (let c = leftTile; c <= rightTile; c++) {
+                let tileDown = getTile(c, bottomTile);
+                if (tileDown === T_SOLID || tileDown === T_BREAKABLE || tileDown === T_SPECIAL_BEER) {
+                    if (player.vy > 0) {
+                        player.y = bottomTile * TILE_SIZE - player.h;
+                        player.vy = 0;
+                        player.grounded = true;
+                    }
+                } else if (tileDown === T_COIN) {
+                    setTile(c, bottomTile, T_AIR);
+                    score += 100;
+                    updateUI();
+                }
+
+                let tileUp = getTile(c, topTile);
+                if (player.vy < 0 && (tileUp === T_BREAKABLE || tileUp === T_SPECIAL_BEER || tileUp === T_SOLID)) {
+                    player.y = (topTile + 1) * TILE_SIZE;
+                    player.vy = 0;
+
+                    if (tileUp === T_BREAKABLE) {
+                        audio.playBreak();
+                        if (player.isBig) {
+                            setTile(c, topTile, T_AIR);
+                            score += 50;
+                        } else {
+                            score += 10;
+                        }
+                        updateUI();
+                    } else if (tileUp === T_SPECIAL_BEER) {
+                        audio.playBreak();
+                        setTile(c, topTile, T_SOLID);
+                        items.push({
+                            x: c * TILE_SIZE,
+                            y: (topTile - 1) * TILE_SIZE,
+                            w: 14,
+                            h: 14,
+                            vy: -2,
+                            type: 'beer'
+                        });
+                    }
+                } else if (tileUp === T_DISCO || tileDown === T_DISCO) {
+                    if (beersCollected > 0) {
+                        triggerWin();
+                    } else {
+                        showBeerWarning();
+                    }
+                }
+            }
+        }
+
+        function triggerWin() {
+            gameState = 'WIN';
+            audio.playVictory();
+            document.getElementById('winOverlay').classList.remove('hidden');
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
+
+            // Fondo Cielo Nocturno Cyberpunk
+            ctx.fillStyle = '#0a0518';
+            ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+            // SILUETA DEL SKYLINE DE MADRID (Torres Kio inclinadas, Gran Vía, etc.)
+            const madridSkylineOffset = (cameraX * 0.15) % 320;
+            
+            ctx.fillStyle = '#140a28';
+            for (let loop = -1; loop < 2; loop++) {
+                let base = loop * 320 - madridSkylineOffset;
+
+                // Edificios Gran Vía
+                ctx.fillRect(base + 10, 110, 45, 100);
+                ctx.fillRect(base + 60, 90, 55, 120);
+                
+                // Torres Kio (Puerta de Europa) - Torres Inclinadas
+                ctx.beginPath();
+                ctx.moveTo(base + 130, 210);
+                ctx.lineTo(base + 155, 70);
+                ctx.lineTo(base + 185, 70);
+                ctx.lineTo(base + 160, 210);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(base + 195, 210);
+                ctx.lineTo(base + 170, 70);
+                ctx.lineTo(base + 200, 70);
+                ctx.lineTo(base + 225, 210);
+                ctx.fill();
+
+                // Edificio Schweppes / Capitol
+                ctx.fillRect(base + 245, 100, 60, 110);
+                ctx.fillRect(base + 260, 80, 30, 20);
+            }
+
+            // LUCES NEÓN EN EDIFICIOS DE MADRID
+            ctx.fillStyle = '#ff007f';
+            ctx.fillRect(50 - (cameraX * 0.15) % 320, 130, 6, 6);
+            ctx.fillRect(265 - (cameraX * 0.15) % 320, 90, 20, 6);
+            ctx.fillStyle = '#00f0ff';
+            ctx.fillRect(145 - (cameraX * 0.15) % 320, 95, 15, 3);
+            ctx.fillRect(180 - (cameraX * 0.15) % 320, 95, 15, 3);
+
+            // TEXTO DE MADRID EN EL CIELO
+            ctx.font = '10px "Press Start 2P"';
+            ctx.fillStyle = 'rgba(255, 0, 128, 0.6)';
+            ctx.fillText("KIKE'S 50s - MADRID NOV26", 40 - cameraX * 0.25, 40);
+
+            let startCol = Math.floor(cameraX / TILE_SIZE);
+            let endCol = startCol + Math.ceil(V_WIDTH / TILE_SIZE) + 1;
+
+            for (let r = 0; r < worldGrid.length; r++) {
+                for (let c = startCol; c < endCol; c++) {
+                    let tile = getTile(c, r);
+                    let x = c * TILE_SIZE - cameraX;
+                    let y = r * TILE_SIZE;
+
+                    if (tile === T_SOLID) {
+                        ctx.fillStyle = '#2b1b54';
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = '#00f0ff';
+                        ctx.strokeRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                    } else if (tile === T_BREAKABLE) {
+                        ctx.fillStyle = '#b32d00';
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#ff6633';
+                        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        ctx.strokeStyle = '#330000';
+                        ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                    } else if (tile === T_SPECIAL_BEER) {
+                        ctx.fillStyle = '#d4a373';
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#fefae0';
+                        ctx.font = '9px "Press Start 2P"';
+                        ctx.fillText("?", x + 4, y + 12);
+                        ctx.strokeStyle = '#faedcd';
+                        ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                    } else if (tile === T_COIN) {
+                        let anim = Math.sin(Date.now() * 0.008 + c) * 4;
+                        ctx.fillStyle = '#ffd700';
+                        ctx.beginPath();
+                        ctx.arc(x + 8, y + 8, Math.max(2, 5 - Math.abs(anim)), 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (tile === T_DISCO) {
+                        // Render de la Entrada a la Discoteca
+                        if (r === 8) { // Techo con letrero Neón
+                            ctx.fillStyle = '#11052C';
+                            ctx.fillRect(x - 12, y, 40, 48);
+                            ctx.strokeStyle = '#ff007f';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(x - 12, y, 40, 48);
+
+                            // Cartel "_____"
+                            ctx.fillStyle = '#000000';
+                            ctx.fillRect(x - 10, y + 4, 36, 14);
+                            ctx.strokeStyle = '#00f0ff';
+                            ctx.strokeRect(x - 10, y + 4, 36, 14);
+
+                            ctx.font = '8px "Press Start 2P"';
+                            ctx.fillStyle = '#ff007f';
+                            ctx.fillText("?????", x - 6, y + 15);
+
+                            // Puerta de la Discoteca
+                            ctx.fillStyle = '#3a005c';
+                            ctx.fillRect(x - 2, y + 22, 20, 26);
+                            ctx.fillStyle = '#ff00a0';
+                            ctx.fillRect(x, y + 24, 7, 24);
+                            ctx.fillRect(x + 9, y + 24, 7, 24);
+                        }
+                    }
+                }
+            }
+
+            items.forEach(it => {
+                if (it.type === 'beer') {
+                    let ix = it.x - cameraX;
+                    ctx.fillStyle = '#ffb703';
+                    ctx.fillRect(ix + 2, it.y + 4, 10, 10);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(ix + 1, it.y + 2, 12, 3);
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.strokeRect(ix + 11, it.y + 6, 3, 5);
+                }
+            });
+
+            // Dibujo del Personaje LIMPIO (sin recuadros)
+            let px = player.x - cameraX;
+            let py = player.y;
+            let currentSprite = player.isBig ? charImgBig : charImgNormal;
+
+            ctx.save();
+            ctx.imageSmoothingEnabled = false;
+
+            if (player.facing === 'left') {
+                ctx.translate(px + player.w, py);
+                ctx.scale(-1, 1);
+                ctx.drawImage(currentSprite, 0, 0, player.w, player.h);
+            } else {
+                ctx.drawImage(currentSprite, px, py, player.w, player.h);
+            }
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            audio.init();
+            document.getElementById('startOverlay').classList.add('hidden');
+            resetGame();
+            gameState = 'PLAYING';
+            audio.startMusic();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            document.getElementById('winOverlay').classList.add('hidden');
+            resetGame();
+            gameState = 'PLAYING';
+            audio.startMusic();
+        });
+
+        window.onload = function() {
+            resetGame();
+            gameLoop();
+        };
+    </script>
 </body>
 </html>
