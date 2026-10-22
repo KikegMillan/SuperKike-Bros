@@ -860,12 +860,20 @@ if (isMuted || !audioCtx) return;
 
 function drawMadridSkyline() {
             // Fondo de cielo nocturno con un degradado vertical
+            // const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            // gradient.addColorStop(0, '#0a0521'); // Azul oscuro arriba
+            // gradient.addColorStop(1, '#1e1b4b'); // Tono más cálido/rojizo abajo
+            // ctx.fillStyle = gradient;
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Fondo de cielo de AMANECER (Degradado rojizo/cálido)
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#0a0521'); // Azul oscuro arriba
-            gradient.addColorStop(1, '#1e1b4b'); // Tono más cálido/rojizo abajo
+            gradient.addColorStop(0, '#3b1424'); // Tono rojizo/morado oscuro arriba
+            gradient.addColorStop(0.5, '#7f1d1d'); // Rojo intenso en el centro
+            gradient.addColorStop(1, '#ea580c'); // Naranja brillante / fuego en el horizonte abajo
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    
             // Efecto Parallax: El skyline se mueve más lento que la cámara (multiplicado por 0.3)
             ctx.save();
             ctx.translate(-cameraX * 0.3, 0);
