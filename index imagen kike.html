@@ -167,8 +167,10 @@
         // --- SINTETIZADOR AUDIO 8-BIT ESTILO SUPER MARIO BROS ---
         let audioCtx = null;
         let isMuted = false;
-        let bgmTimeout = null;
+        let bgmInterval = null;
         let isBgmPlaying = false;
+        let activeOscillators = []; // Control de sonidos sonando
+        let activeTimeouts = [];   // Control de notas programadas pendientes
 
         function initAudio() {
             if (!audioCtx) {
@@ -179,9 +181,17 @@
             }
         }
 
-        function playTone(freq, type, duration, volume = 0.1, delay = 0) {
+        function playTone(freq, type, duration, volume = 0.1, delay = 0, isBGM = false) {
             if (isMuted || !audioCtx) return;
-            setTimeout(() => {
+            
+            const timeoutId = setTimeout(() => {
+                // Remover de la lista de pendientes al ejecutarse
+                const tIndex = activeTimeouts.indexOf(timeoutId);
+                if (tIndex > -1) activeTimeouts.splice(tIndex, 1);
+
+                // Si es música de fondo y ya se detuvo, ignorar
+                if (isBGM && !isBgmPlaying) return;
+
                 try {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
@@ -193,11 +203,22 @@
                     gain.connect(audioCtx.destination);
                     osc.start();
                     osc.stop(audioCtx.currentTime + duration);
+
+                    activeOscillators.push(osc);
+                    osc.onended = () => {
+                        const index = activeOscillators.indexOf(osc);
+                        if (index > -1) activeOscillators.splice(index, 1);
+                    };
                 } catch(e){}
             }, delay * 1000);
+
+            // Si pertenece a la música de fondo, lo guardamos para poder cancelarlo
+            if (isBGM) {
+                activeTimeouts.push(timeoutId);
+            }
         }
 
-        // Sonido de Salto Retro Classic
+        // Sonido de Salto Retro Classic (Suave y equilibrado)
         function playJumpSound() {
             if (isMuted || !audioCtx) return;
             try {
@@ -206,8 +227,11 @@
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(160, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.12);
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                
+                // Volumen inicial bajo y rampa exponencial para que se desvanezca suavemente
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+                
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
@@ -218,8 +242,8 @@
         // Sonido Moneda / Cerveza estilo Mario
         function playPowerupSound() {
             if (isMuted || !audioCtx) return;
-            playTone(987.77, 'square', 0.08, 0.12, 0);   // B5
-            playTone(1318.51, 'square', 0.25, 0.12, 0.08); // E6
+            playTone(987.77, 'square', 0.08, 0.12, 0);   
+            playTone(1318.51, 'square', 0.25, 0.12, 0.08); 
         }
 
         // Sonido Romper Bloque
@@ -245,7 +269,6 @@
 
         // --- MÚSICA DE FONDO (TEMA PRINCIPAL ESTILO SUPER MARIO BROS) ---
         const marioThemeMelody = [
-            // Frase 1 (Intro clásica de Mario)
             { f: 659.25, d: 0.12, t: 0 },
             { f: 659.25, d: 0.12, t: 0.15 },
             { f: 0,      d: 0.12, t: 0.30 },
@@ -258,8 +281,6 @@
             { f: 0,      d: 0.20, t: 1.45 },
             { f: 392.00, d: 0.20, t: 1.70 },
             { f: 0,      d: 0.20, t: 1.95 },
-
-            // Frase 2
             { f: 523.25, d: 0.16, t: 2.20 },
             { f: 0,      d: 0.10, t: 2.40 },
             { f: 392.00, d: 0.16, t: 2.55 },
@@ -282,22 +303,17 @@
             { f: 493.88, d: 0.20, t: 5.85 }
         ];
 
+        const loopDurationMs = 6200;
+
         function playBGMSequence() {
             if (isMuted || !isBgmPlaying || !audioCtx) return;
 
-            const totalDuration = 6.2; // Duración en segundos del bucle
-
             marioThemeMelody.forEach(note => {
-                if (note.f > 0) {
-                    playTone(note.f, 'square', note.d, 0.08, note.t);
-                    // Acompañamiento de bajo
-                    playTone(note.f / 2, 'triangle', note.d * 0.9, 0.06, note.t);
+                if (note.f > 0 && isBgmPlaying) {
+                    playTone(note.f, 'square', note.d, 0.08, note.t, true);
+                    playTone(note.f / 2, 'triangle', note.d * 0.9, 0.06, note.t, true);
                 }
             });
-
-            bgmTimeout = setTimeout(() => {
-                if (isBgmPlaying) playBGMSequence();
-            }, totalDuration * 1000);
         }
 
         function startBGM() {
@@ -305,14 +321,31 @@
             if (isMuted) return;
             isBgmPlaying = true;
             playBGMSequence();
+            bgmInterval = setInterval(() => {
+                if (isBgmPlaying) playBGMSequence();
+            }, loopDurationMs);
         }
 
         function stopBGM() {
             isBgmPlaying = false;
-            if (bgmTimeout) {
-                clearTimeout(bgmTimeout);
-                bgmTimeout = null;
+            
+            // 1. Limpiar el bucle de repetición principal
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
             }
+
+            // 2. CANCELAR AL INSTANTE todos los temporizadores pendientes de la melodía
+            activeTimeouts.forEach(id => clearTimeout(id));
+            activeTimeouts = [];
+
+            // 3. Forzar el apagado inmediato de los osciladores que estén sonando
+            activeOscillators.forEach(osc => {
+                try {
+                    osc.stop();
+                } catch(e) {}
+            });
+            activeOscillators = [];
         }
 
         // --- SPRITES EN SVG ---
@@ -561,6 +594,7 @@
             // Meta Discoteca
             if (isColliding(player, discoDoor)) {
                 if (beersCollected >= 1) {
+                    stopBGM();
                     winGame();
                 } else {
                     showBeerWarning();
