@@ -868,7 +868,7 @@ function drawMadridSkyline() {
 
             // Efecto Parallax: El skyline se mueve más lento que la cámara (multiplicado por 0.3)
             ctx.save();
-            ctx.translate(cameraX * 0.3, 0);
+            ctx.translate(-cameraX * 0.3, 0);
 
             // Color base de los edificios en silueta estilo retro
             ctx.fillStyle = '#0f172a';
