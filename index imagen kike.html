@@ -84,7 +84,7 @@
     <header class="w-full bg-slate-900 border-b-2 border-fuchsia-500 p-2 flex justify-between items-center text-[10px] sm:text-xs text-amber-300 z-20 shrink-0">
         <div class="font-bold text-pink-500">KIKE's 50s</div>
         <div id="scoreDisplay">PTS: 00000</div>
-        <div id="beerDisplay">🍺: 0/X</div>
+        <div id="beerDisplay">🍺: 0</div>
         <button id="audioToggleBtn" class="bg-slate-800 text-cyan-400 border border-cyan-400 px-2 py-1 rounded text-[9px] hover:bg-slate-700 active:scale-95">🔊 SONIDO</button>
     </header>
 
@@ -254,19 +254,91 @@
             playTone(70, 'triangle', 0.15, 0.25, 0.06);
         }
 
-        // Fanfarria Victoria Estilo Mario Stage Clear
-        function playWinSound() {
-            if (isMuted || !audioCtx) return;
-            stopBGM();
-            const notes = [
-                { f: 261.63, d: 0.1 }, { f: 329.63, d: 0.1 }, { f: 392.00, d: 0.1 },
-                { f: 523.25, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 783.99, d: 0.3 }
-            ];
-            notes.forEach((n, i) => {
-                playTone(n.f, 'square', n.d, 0.15, i * 0.12);
-            });
-        }
+        // Fanfarria / Tono de Victoria Estilo "Donkey Kong Jr." (Arcade / NES)
+function playWinSound() {
+if (isMuted || !audioCtx) return;
+    
+    if (typeof stopBGM === 'function') {
+        stopBGM();
+    }
 
+    const now = audioCtx.currentTime;
+
+    // Función interna optimizada para notas rápidas y festivas
+    function playPartyNote(freq, type, startTime, duration, volume = 0.12) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        // Envolvente de volumen rápida para notas con mucho rebote ("bouncy")
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(volume, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+    }
+
+    // --- FASE 1: Llamada a la fiesta / Fanfarria alegre (0.0s - 1.2s) ---
+    // Un ritmo contagioso "Ta-ta-ta-ta, ¡TA!"
+    const introParty = [
+        { f: 523.25, t: 0.00, d: 0.12 }, // C5
+        { f: 523.25, t: 0.15, d: 0.12 }, // C5
+        { f: 523.25, t: 0.30, d: 0.12 }, // C5
+        { f: 659.25, t: 0.45, d: 0.20 }, // E5
+        { f: 783.99, t: 0.70, d: 0.20 }, // G5
+        { f: 1046.50, t: 0.95, d: 0.30 }  // C6
+    ];
+
+    // --- FASE 2: Arpegio festivo ultra animado (1.3s - 3.2s) ---
+    // Notas rápidas en movimiento ascendente estilo rave / juego de baile
+    const arpeggio = [
+        // Subida 1
+        { f: 523.25, t: 1.30, d: 0.10 }, // C5
+        { f: 659.25, t: 1.40, d: 0.10 }, // E5
+        { f: 783.99, t: 1.50, d: 0.10 }, // G5
+        { f: 880.00, t: 1.60, d: 0.10 }, // A5
+        { f: 1046.50, t: 1.70, d: 0.15 }, // C6
+        
+        // Repetición con más energía arriba
+        { f: 659.25, t: 1.90, d: 0.10 }, // E5
+        { f: 783.99, t: 2.00, d: 0.10 }, // G5
+        { f: 880.00, t: 2.10, d: 0.10 }, // A5
+        { f: 1046.50, t: 2.20, d: 0.10 }, // C6
+        { f: 1174.66, t: 2.30, d: 0.10 }, // D6
+        { f: 1318.51, t: 2.40, d: 0.25 }  // E6
+    ];
+
+    // --- FASE 3: Remate "¡A bailar!" y acorde con bajo enérgico (3.0s - 5.5s) ---
+    const finalPartyBeat = [
+        { f: 880.00,  t: 2.80, d: 0.12 }, // A5
+        { f: 987.77,  t: 2.95, d: 0.12 }, // B5
+        { f: 1046.50, t: 3.10, d: 2.40 }, // C6 (Nota principal sostenida)
+        
+        // Acorde acompañante festivo
+        { f: 523.25,  t: 3.10, d: 2.40 }, // C5
+        { f: 659.25,  t: 3.10, d: 2.40 }, // E5
+        { f: 783.99,  t: 3.10, d: 2.40 }, // G5
+        
+        // Bajo retumbante para darle cuerpo de "fiesta"
+        { f: 130.81,  t: 3.10, d: 2.40 }  // C3 (Bajo)
+    ];
+
+    // Ejecutar melodías principales con 'square' (sonido alegre y brillante de videojuego)
+    [...introParty, ...arpeggio].forEach(n => {
+        playPartyNote(n.f, 'square', now + n.t, n.d, 0.12);
+    });
+
+    // Ejecutar el remate final con 'sawtooth' para que tenga mucha fuerza
+    finalPartyBeat.forEach(n => {
+        playPartyNote(n.f, 'sawtooth', now + n.t, n.d, 0.10);
+    });
+}
         // --- MÚSICA DE FONDO (TEMA PRINCIPAL ESTILO SUPER MARIO BROS) ---
         const marioThemeMelody = [
             { f: 659.25, d: 0.12, t: 0 },
