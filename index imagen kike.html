@@ -754,8 +754,11 @@ if (isMuted || !audioCtx) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Fondo de cielo estrellado estilo retro
-            ctx.fillStyle = '#090514';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ctx.fillStyle = '#090514';
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Fondo con el Skyline de Madrid y Parallax
+            drawMadridSkyline();
 
             ctx.save();
             ctx.translate(-cameraX, 0);
@@ -853,6 +856,71 @@ if (isMuted || !audioCtx) return;
 
             ctx.restore();
         }
+
+
+function drawMadridSkyline() {
+            // Fondo de cielo nocturno con un degradado vertical
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0a0521'); // Azul oscuro arriba
+            gradient.addColorStop(1, '#1e1b4b'); // Tono más cálido/rojizo abajo
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Efecto Parallax: El skyline se mueve más lento que la cámara (multiplicado por 0.3)
+            ctx.save();
+            ctx.translate(cameraX * 0.3, 0);
+
+            // Color base de los edificios en silueta estilo retro
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+
+            // Coordenada base del suelo donde apoyan los edificios
+            const baseY = groundY;
+
+            // --- 1. Edificios de fondo (Siluetas secundarias) ---
+            // Edificio genérico / Bloques de pisos
+            ctx.fillRect(100, baseY - 180, 80, 180);
+            ctx.fillRect(300, baseY - 220, 100, 220);
+            ctx.fillRect(650, baseY - 190, 90, 190);
+            ctx.fillRect(900, baseY - 240, 110, 240);
+
+            // --- 2. Siluetas icónicas de Madrid ---
+            
+            // Edificio Telefónica (Gran Vía) - Torre escalonada clásica
+            ctx.fillRect(450, baseY - 280, 60, 280);
+            ctx.fillRect(462, baseY - 320, 36, 40); // Torre superior y antena
+            ctx.beginPath();
+            ctx.moveTo(480, baseY - 350);
+            ctx.lineTo(480, baseY - 320);
+            ctx.stroke();
+
+            // Torre de Madrid (Plaza de España)
+            ctx.fillRect(780, baseY - 310, 70, 310);
+            ctx.fillRect(800, baseY - 360, 30, 50); // Pico característico
+
+            // Las Cuatro Torres (al fondo, más altas y modernas)
+            const fourTowersX = 1150;
+            for (let i = 0; i < 4; i++) {
+                ctx.fillRect(fourTowersX + (i * 45), baseY - (340 - i * 15), 30, 340 - i * 15);
+            }
+
+            // Ventanas iluminadas estilo retro (píxeles brillantes amarillos/cian)
+            ctx.fillStyle = '#facc15';
+            // Ventanas Telefónica
+            for(let y = baseY - 260; y < baseY - 40; y += 20) {
+                ctx.fillRect(465, y, 6, 10);
+                ctx.fillRect(479, y, 6, 10);
+            }
+            // Ventanas Torre de Madrid
+            for(let y = baseY - 290; y < baseY - 40; y += 25) {
+                ctx.fillRect(790, y, 8, 12);
+                ctx.fillRect(820, y, 8, 12);
+            }
+
+            ctx.restore();
+        }
+
 
         function drawDiscotecaEntrance() {
             const dx = discoDoor.x;
