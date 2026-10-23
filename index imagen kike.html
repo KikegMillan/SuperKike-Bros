@@ -937,91 +937,213 @@ function drawMadridSkyline() {
         }
 
 
-        function drawDiscotecaEntrance() {
-            const dx = discoDoor.x;
-            const dy = discoDoor.y;
-            const time = Date.now() * 0.005;
+function drawDiscotecaEntrance() {
+      const dx = discoDoor.x;
+      const dy = discoDoor.y;
+      const time = Date.now() * 0.005;
+      const bassPulse = Math.sin(time * 3) * 2; // Rebote para los altavoces
 
-            // Edificio Discoteca Neón
-            ctx.fillStyle = '#0a0a16';
-            ctx.fillRect(dx - 30, dy - 60, 150, 170);
-            
-            // Borde Arco Neón Animado
-            const neonHue = Math.floor((Date.now() / 10) % 360);
-            ctx.strokeStyle = `hsl(${neonHue}, 100%, 50%)`;
-            ctx.lineWidth = 4;
-            ctx.strokeRect(dx - 30, dy - 60, 150, 170);
+      // 1. EDIFICIO PRINCIPAL DE LA DISCOTECA
+      ctx.fillStyle = '#060713';
+      ctx.fillRect(dx - 60, dy - 120, 210, 230);
 
-            // Altavoces a los lados
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(dx - 25, dy, 18, 50);
-            ctx.fillRect(dx + 97, dy, 18, 50);
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(dx - 16, dy + 15, 6, 0, Math.PI * 2);
-            ctx.arc(dx - 16, dy + 35, 6, 0, Math.PI * 2);
-            ctx.arc(dx + 106, dy + 15, 6, 0, Math.PI * 2);
-            ctx.arc(dx + 106, dy + 35, 6, 0, Math.PI * 2);
-            ctx.fill();
+      // Marco Exterior Neón con Resplandor Glow
+      const neonHue = Math.floor((Date.now() / 15) % 360);
+      ctx.save();
+      ctx.shadowColor = `hsl(${neonHue}, 100%, 50%)`;
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = `hsl(${neonHue}, 100%, 60%)`;
+      ctx.lineWidth = 4;
+      ctx.strokeRect(dx - 60, dy - 120, 210, 230);
+      ctx.restore();
 
-            // Puerta con cortina / luces
-            ctx.fillStyle = '#0284c7';
-            ctx.fillRect(dx, dy + 20, 90, 90);
-            ctx.fillStyle = 'rgba(236, 72, 153, 0.4)';
-            ctx.fillRect(dx + 5, dy + 25, 80, 85);
+      // 2. LÁSERES MÓVILES DESDE EL TECHO DE LA DISCO
+      const laserColors = ['rgba(255, 0, 128, 0.4)', 'rgba(0, 240, 255, 0.4)', 'rgba(160, 32, 240, 0.4)', 'rgba(0, 255, 128, 0.4)'];
+      for (let i = 0; i < 4; i++) {
+        const sweepAngle = Math.sin(time + i * 1.5) * 0.8 + (i - 1.5) * 0.4;
+        const laserLength = 400;
+        const originX = dx - 30 + i * 50;
+        const originY = dy - 118;
 
-            // Bola de Discoteca Giratoria
-            const ballX = dx + 45;
-            const ballY = dy - 80;
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(ballX, dy - 95);
-            ctx.lineTo(ballX, ballY);
-            ctx.stroke();
+        ctx.save();
+        ctx.strokeStyle = laserColors[i];
+        ctx.lineWidth = 3;
+        ctx.shadowColor = laserColors[i];
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(originX + Math.sin(sweepAngle) * laserLength, originY + Math.cos(sweepAngle) * laserLength);
+        ctx.stroke();
+        ctx.restore();
+      }
 
-            ctx.fillStyle = '#e2e8f0';
-            ctx.beginPath();
-            ctx.arc(ballX, ballY, 14, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#64748b';
-            ctx.stroke();
+      // 3. ALTAVOCES MEJORADOS HI-FI (Loudspeakers con vibra de bajo)
+      const drawSpeaker = (sx, sy) => {
+        // Torre de Altavoz
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(sx, sy, 26, 75);
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sx, sy, 26, 75);
 
-            // Destellos de la bola de discoteca
-            for (let i = 0; i < 6; i++) {
-                const angle = time + (i * Math.PI / 3);
-                const lx = ballX + Math.cos(angle) * 35;
-                const ly = ballY + Math.sin(angle) * 25;
-                ctx.strokeStyle = i % 2 === 0 ? 'rgba(0, 240, 255, 0.6)' : 'rgba(255, 0, 127, 0.6)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(ballX, ballY);
-                ctx.lineTo(lx, ly);
-                ctx.stroke();
-            }
+        // Subwoofers con rebote dinámico
+        const r1 = 8 + bassPulse * 0.5;
+        const r2 = 10 + bassPulse * 0.8;
 
-            // Cartel Luminoso DISCO
-            ctx.fillStyle = '#020617';
-            ctx.fillRect(dx - 25, dy - 55, 140, 45);
-            ctx.strokeStyle = '#00f0ff';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(dx - 25, dy - 55, 140, 45);
+        // Tweeter superior
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(sx + 13, sy + 15, 4, 0, Math.PI * 2);
+        ctx.fill();
 
-            // Luces parpadeantes en el marco del cartel
-            for (let lx = dx - 20; lx <= dx + 110; lx += 15) {
-                const isBright = Math.sin(time * 2 + lx) > 0;
-                ctx.fillStyle = isBright ? '#facc15' : '#475569';
-                ctx.beginPath();
-                ctx.arc(lx, dy - 50, 2.5, 0, Math.PI * 2);
-                ctx.arc(lx, dy - 15, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        // Woofer Medio
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(sx + 13, sy + 35, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(sx + 13, sy + 35, r1, 0, Math.PI * 2);
+        ctx.fill();
 
-            // Texto DISCO
-            ctx.fillStyle = '#ff007f';
-            ctx.font = 'bold 9px "Press Start 2P"';
-            ctx.fillText("KIKE-50s CLUB", dx - 18, dy - 28);
-        }
+        // Subwoofer Grande
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(sx + 13, sy + 58, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ec4899';
+        ctx.beginPath();
+        ctx.arc(sx + 13, sy + 58, r2, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      drawSpeaker(dx - 52, dy + 15);
+      drawSpeaker(dx + 116, dy + 15);
+
+      // 4. PUERTA E INTERIOR DE LA DISCOTECA
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(dx, dy + 10, 90, 100);
+
+      // Interior Iluminado / Luces de Fiesta
+      const intGlow = ctx.createRadialGradient(dx + 45, dy + 60, 5, dx + 45, dy + 60, 50);
+      intGlow.addColorStop(0, `hsla(${neonHue + 120}, 100%, 50%, 0.9)`);
+      intGlow.addColorStop(1, 'rgba(2, 6, 23, 0.2)');
+      ctx.fillStyle = intGlow;
+      ctx.fillRect(dx + 2, dy + 12, 86, 98);
+
+      // Cortinas de Flecos VIP
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1;
+      for (let cx = dx + 5; cx < dx + 85; cx += 5) {
+        ctx.beginPath();
+        ctx.moveTo(cx, dy + 10);
+        ctx.lineTo(cx + Math.sin(time + cx) * 3, dy + 60 + Math.cos(cx) * 15);
+        ctx.stroke();
+      }
+
+      // 5. BOUNCERS / PORTEROS DE SEGURIDAD
+      const drawBouncer = (bx, by, facingRight) => {
+        // Cuerpo / Traje Esmoquin
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(bx - 12, by - 35, 24, 38); // Espalda/Pecho ancho
+
+        // Camisa Blanca e Interior
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(bx - 3, by - 32, 6, 12);
+        ctx.fillStyle = '#dc2626'; // Pajarita/Corbata
+        ctx.fillRect(bx - 2, by - 32, 4, 3);
+
+        // Cabeza
+        ctx.fillStyle = '#f17c58'; // Tono de piel
+        ctx.beginPath();
+        ctx.arc(bx, by - 42, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Gafas de Sol Negras
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(facingRight ? bx - 2 : bx - 7, by - 45, 9, 4);
+
+        // Pinganillo Auricular
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(bx + (facingRight ? -5 : 5), by - 42);
+        ctx.lineTo(bx + (facingRight ? -8 : 8), by - 36);
+        ctx.stroke();
+
+        // Brazos Cruzados
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(bx - 14, by - 26, 28, 10);
+      };
+
+      // Porteros a cada lado de la puerta
+      drawBouncer(dx - 10, dy + 85, true);
+      drawBouncer(dx + 100, dy + 85, false);
+
+      // 6. BOLA DE DISCOTECA GIRATORIA
+      const ballX = dx + 45;
+      const ballY = dy - 80;
+      
+      // Cadena de sujeción
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(ballX, dy - 120);
+      ctx.lineTo(ballX, ballY);
+      ctx.stroke();
+
+      // Esfera con resplandor
+      ctx.save();
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#f1f5f9';
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Destellos giratorios de la bola
+      for (let i = 0; i < 8; i++) {
+        const angle = time * 1.5 + (i * Math.PI / 4);
+        const lx = ballX + Math.cos(angle) * 55;
+        const ly = ballY + Math.sin(angle) * 35;
+        ctx.strokeStyle = i % 2 === 0 ? 'rgba(0, 240, 255, 0.8)' : 'rgba(255, 0, 127, 0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(ballX, ballY);
+        ctx.lineTo(lx, ly);
+        ctx.stroke();
+      }
+
+      // 7. CARTEL LUMINOSO DISCO
+      ctx.save();
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(dx - 35, dy - 60, 160, 48);
+      
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(dx - 35, dy - 60, 160, 48);
+
+      // Luces parpadeantes en el marco
+      for (let lx = dx - 30; lx <= dx + 120; lx += 12) {
+        const isBright = Math.sin(time * 3 + lx) > 0;
+        ctx.fillStyle = isBright ? '#facc15' : '#334155';
+        ctx.beginPath();
+        ctx.arc(lx, dy - 55, 2.5, 0, Math.PI * 2);
+        ctx.arc(lx, dy - 16, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Texto en Neón
+      ctx.shadowColor = '#ff007f';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#ff007f';
+      ctx.font = 'bold 10px "Press Start 2P"';
+      ctx.fillText("KIKE-50s CLUB", dx - 26, dy - 30);
+      ctx.restore();
+    }
 
         function gameLoop() {
             update();
